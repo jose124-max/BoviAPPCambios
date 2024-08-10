@@ -1,0 +1,35 @@
+{% extends 'main/base_generic.html' %}
+{% load static %}
+
+{% block title %}Busqueda{% endblock %}
+
+
+{% block content %}
+  <div class="d-flex flex-column align-items-center" style="height: 90%;">
+    <div class="container-sm border card">
+        <h3 class="card-title">Resultados de búsqueda</h3>
+        <table class="table table-responsive-md table-hover table-bordered">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Cabeza</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Peso</th>
+                <th scope="col">Fecha de nacimiento</th>
+              </tr>
+            </thead>
+            <tbody> 
+                {% for ganado in vacas %} 
+                <tr>
+                  <th scope="row">{{ forloop.counter }}</th>
+                  <td><a href="{% url 'cattle_info' cattle_id=ganado.id %}">{{ ganado.id }}</a></td>
+                  <td>{{ganado.tipo.nombre_tipo}}</td>
+                  <td>{{ganado.peso_kg}}</td>
+                  <td>{{ganado.fecha_nacimiento}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+    </div>
+  </div>
+{% endblock %}

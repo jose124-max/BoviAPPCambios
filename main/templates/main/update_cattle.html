@@ -1,0 +1,67 @@
+{% extends 'main/base_generic.html' %}
+{% load static %}
+
+{% block title %}Editar vaca{% endblock %}
+
+
+{% block content %}
+<div class="d-flex flex-column align-items-center" style="height: 90%;">
+    <h1 class="p-4">Editar vaca</h1>
+    <div class="container-sm border rounded form-inline card">
+        <form action = "{% url 'update_cattle' cattle_id=vaquita.id %}" method = "POST" >
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="idCustomerName">Nombre del cliente</label>
+                <input type="text" class="form-control" id="idCustomerName" name="inputCustomerName" placeholder="John Doe" value="{{ vaquita.customer_name }}" required aria-describedby="help">
+            </div>
+            <div class="form-group">
+                <label for="idWeight">Peso (Kg)</label>
+                <input type="number" class="form-control" id="idWeight" name="inputWeight" placeholder="450.00" value="{{ vaquita.peso_kg }}"  min="0" max="1000" step="0.01" required aria-describedby="help">
+            </div>
+            <div class="form-group">
+                <label for="idBirthdate">Fecha de nacimiento</label>
+                <script>console.log("{{ birthdate }}")</script>
+                <input type="date" class="form-control" id="idBirthdate" name="inputBirthdate" placeholder="2022-01-01" value="{{ birthdate }}" required aria-describedby="help">
+            </div>
+            <div class="form-group">
+                <label for="idBreed">Raza</label>
+                <select id="idBreed" name="inputBreed" class="form-select" required>
+                    <option value="" disabled>--Seleccione una--</option>
+                    {% for i in breeds %}
+                    <option value="{{ i.id }}" {% if i.id == vaquita.raza.pk %} selected {% endif %} >{{ i.nombre_raza }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="idType">Tipo de producción</label>
+                <select id="idType" name="inputType" class="form-select" required>
+                    <option value="" selected disabled>--Seleccione una--</option>
+                    {% for i in cow_types %}
+                    <option value="{{ i.id }}" {% if i.id == vaquita.tipo.pk %} selected {% endif %} >{{ i.nombre_tipo }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="idEstate">Fincas</label>
+                <select id="idEstate" name="inputEstate" class="form-select" required>
+                    <option value="" selected disabled>--Seleccione una--</option>
+                    {% for i in estates %}
+                    <option value="{{ i.id }}" {% if i.id == associated_estate.finca.id %} selected {% endif %}>{{ i.nombre_finca }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="idLot">Lote</label>
+                <input type="number" class="form-control" id="idLot" name="inputLot" placeholder="13" value="{{ associated_estate.lote }}" min="0" step="1" required aria-describedby="help">
+            </div>
+            <div class="form-group">
+                <label for="idPaddock">Potrero</label>
+                <input type="number" class="form-control" id="idPaddock" name="inputPaddock" placeholder="1234" value="{{ associated_estate.potrero }}" min="0" step="1" required aria-describedby="help">
+            </div>
+            <br>
+            <button type="submit" class="btn btn-primary">Editar vaca</button>
+        </form>
+        <br>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'main/base_generic.html' %}
+{% load static %}
+
+{% block title %}BoviApp{% endblock %}
+
+
+{% block content %}
+
+    <div class="container">
+        <div class="row justify-content-around">
+            <div class="col-auto">
+                <img src="{% static 'img/logo.jpg'%}" alt="" class="d-block w-60 align-content-center ">
+            </div>
+            <div class="row">
+                <div class="col-3"></div>
+                <div class="col-6">
+                    <br>
+                    {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                        <div {% if message.tags %} class="{{message.tags}} alert alert-dismissible alert-warning"{% endif %}>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            <h4 class="alert-heading">¡Cuidado!</h4>
+                            <p class="mb-0">{{ message }}</p>
+                        </div>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    <form action="{% url 'our_login' %}" method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3 my-5">
+                            <label for="correoElectronico" class="form-label">Correo Electrónico</label>
+                            <input type="email" class="form-control" id="correoElectronico" name="correo" aria-describedby="emailHelp">
+                            <!--div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div-->
+                        </div>
+                        <div class="mb-3">
+                            <label for="contraseña" class="form-label">Contraseña</label>
+                            <input type="password" class="form-control" id="contraseña" name="contra" aria-describedby="passHelp">
+                            <!--div id="emailHelp" class="form-text">We'll never ask for your password.</div-->
+                            <small><a href="{% url 'password_reset' %}">Recuperar contraseña</a></small>
+                        </div>
+                        <div class="mb-3">
+                            <input type="checkbox" id="showPassword"> Mostrar contraseña
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="recuerdame" name="inputRememberme">
+                            <label class="form-check-label" for="recuerdame">Recordarme</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="ingresar">Ingresar</button>
+                    </form>
+                    <br>
+                    <small>¿No tiene cuenta? <a href="{% url 'signup' %}">Regístrese</a></small>
+                    
+                    <script>
+                        document.getElementById('showPassword').addEventListener('change', function() {
+                            var passwordInput = document.getElementById('contraseña');
+                            if (this.checked) {
+                                passwordInput.type = 'text';
+                            } else {
+                                passwordInput.type = 'password';
+                            }
+                        });
+                    </script>
+                    
+                <div class="col-3"></div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

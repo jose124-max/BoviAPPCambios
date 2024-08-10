@@ -1,0 +1,19 @@
+$primary: #261901;
+$link-color: #4478A6;
+$hover-color: darken($link-color, 20%);
+$visited-color: lighten($link-color, 20%);
+
+@import "_variables.scss";
+@import "bootstrap/scss/bootstrap.scss";
+@import "_bootswatch.scss";
+
+
+html{
+    height: 100%;
+}
+
+
+body {
+    height: 100%;
+    background-color: rgb(250, 252, 191); //fcebbf, tinte de ecf429
+}

@@ -1,0 +1,260 @@
+{% extends 'main/base_generic.html' %}
+{% load static %}
+
+{% block title %}BoviApp{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+<!-- Aquí empieza, Búsqueda por raza del animal -->
+<style>
+  /* Estilo para el contenedor del formulario */
+  .form-container {
+    display: flex;
+    flex-wrap: wrap;
+    /* Permite que los elementos se ajusten en múltiples filas si no caben en una sola fila */
+    gap: 1rem;
+    /* Espacio entre los inputs */
+    align-items: center;
+    /* Alinea los elementos verticalmente al centro */
+    justify-content: flex-start;
+    /* Alinea los elementos a la izquierda */
+  }
+
+  /* Estilo para los inputs y selects dentro del formulario */
+  .form-container .form-control,
+  .form-container .form-select {
+    flex: 1 1 200px;
+    /* Permite que los inputs crezcan y se encojan con un ancho base de 200px */
+    margin: 0.5rem 0;
+    /* Espaciado arriba y abajo de cada input */
+  }
+
+  /* Estilo para el botón de enviar */
+  .form-container .btn {
+    flex: 0 1 auto;
+    /* Mantiene el tamaño del botón basado en su contenido */
+    margin-top: 0.5rem;
+    /* Espaciado arriba del botón */
+  }
+
+  select {
+
+    margin: 10px;
+  }
+</style>
+<div class="form-container">
+  <div class="container px-4 py-1 align-items-center rounded justify-content-center" id="busqueda"
+    style="background-image: url('{% static " img/pastoreo.avif"%}');">
+    <div class="row row-cols-1 row-cols-lg-1 align-items-stretch g-4 py-1">
+      <label for="busq_raza" id="title_busq_raza">Búsqueda avanzada de ganado</label>
+      <form action="{% url 'buscar_vacas' %}" method="POST" class="form-container">
+        {% csrf_token %}
+
+        
+        <br/>
+        <!-- Filtro por raza -->
+        <select id="busq_raza" name="raza" class="form-select">
+          <option value="" selected disabled>--Seleccione una raza--</option>
+          <option id="loading-spinner" disabled>Cargando razas...</option>
+          <div id="raza-options" style="display: none;">
+            {% for i in breeds %}
+            <option value="{{ i.id }}">{{ i.nombre_raza }}</option>
+            {% endfor %}
+          </div>
+        </select>
+
+        <!-- Filtro por tipo -->
+        <select id="busq_tipo" name="tipo" class="form-select">
+          <option value="" selected disabled>--Seleccione un tipo--</option>
+          {% for i in types %}
+          <option value="{{ i.id }}">{{ i.nombre_tipo }}</option>
+          {% endfor %}
+        </select>
+        <!-- Filtro por finca -->
+        <select id="busq_finca" name="finca" class="form-select">
+          <option value="" selected disabled>--Seleccione una finca--</option>
+          {% for finca in fincas %}
+          <option value="{{ finca.id }}">{{ finca.nombre_finca }}</option>
+          {% endfor %}
+        </select>
+
+        <!-- Filtro por peso mínimo -->
+        <input type="number" name="peso_min" class="form-control" placeholder="Peso mínimo (kg)" min="0">
+
+        <!-- Filtro por peso máximo -->
+        <input type="number" name="peso_max" class="form-control" placeholder="Peso máximo (kg)" min="0">
+
+        <input type="submit" value="Buscar" class="btn btn-primary btn-lg" style="width: 100%;">
+      </form>
+    </div>
+  </div>
+</div>
+<!-- Aqui empieza, Informacion del perfil -->
+<div class="container px-4 py-1 align-items-center justify-content-center" id="perfil">
+  <div class="row row-cols-1 row-cols-md-2 align-items-md-center g-5 py-5">
+    <div class="d-flex flex-column align-items-start gap-2">
+      <h3 class="fw-bold">Esta es la información actual de tu perfil</h3>
+      <p class="text-muted">Usando el boton, EDITAR, podrá modificar la información de su perfil para mantenerlo
+        actualizado</p>
+      <a href="{% url 'actualizar' %}" class="btn btn-primary btn-lg">Editar</a>
+
+    </div>
+    <div class="row row-cols-1 row-cols-sm-2 g-4">
+      <div class="d-flex flex-column gap-2">
+        <div
+          class="feature-icon-small d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-4 rounded-3">
+          <svg class="bi" width="1em" height="1em">
+            <use xlink:href="#collection" />
+          </svg>
+        </div>
+        <h4 class="fw-semibold mb-0">Correo Electrónico</h4>
+        <p class="text-muted">Email: {{user.email}}</p>
+      </div>
+
+      <div class="d-flex flex-column gap-2">
+        <div
+          class="feature-icon-small d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-4 rounded-3">
+          <svg class="bi" width="1em" height="1em">
+            <use xlink:href="#gear-fill" />
+          </svg>
+        </div>
+        <h4 class="fw-semibold mb-0">Contacto con interesados</h4>
+        <p class="text-muted">Teléfono: {{usuario.telefono}}</p>
+      </div>
+
+      <div class="d-flex flex-column gap-2">
+        <div
+          class="feature-icon-small d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-4 rounded-3">
+          <svg class="bi" width="1em" height="1em">
+            <use xlink:href="#speedometer" />
+          </svg>
+        </div>
+        <h4 class="fw-semibold mb-0">Ubicación</h4>
+        <p class="text-muted">Dirección: {{usuario.direccion}}</p>
+      </div>
+
+      <div class="d-flex flex-column gap-2">
+        <div
+          class="feature-icon-small d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-4 rounded-3">
+          <svg class="bi" width="1em" height="1em">
+            <use xlink:href="#table" />
+          </svg>
+        </div>
+        <h4 class="fw-semibold mb-0">Contraseña</h4>
+        <p class="text-muted">Deberá recordar su contraseña actual para poder modificarla</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% else %}
+<!-- Servicios que ofrece -->
+<div class="container px-4 py-5">
+  <h2 class="pb-2 border-bottom border-dark" id="servicios">Servicios Disponibles</h2>
+
+  <div class="row row-cols-1 row-cols-md-2 align-items-md-center g-5 py-5">
+    <div class="d-flex flex-column align-items-start gap-2">
+      <h3 class="fw-bold">El futuro del manejo del ganado está aquí para ayudarle</h3>
+      <p class="text-muted">Atrás quedó la época en donde los regístros de ganado se llevaban en papel y lápiz, con la
+        seguridad que nuestros servicios ofrecen, olvide la pérdida de información sobre su ganado. Entre a nuestra
+        comunidad y pruebe</p>
+      <a href="{% url 'signup' %}" class="btn btn-primary btn-lg">Regístrese</a>
+
+    </div>
+    <div class="row row-cols-1 row-cols-sm-2 g-4">
+      <div class="d-flex flex-column gap-2">
+
+        <h4 class="fw-semibold mb-0">Manejo de información</h4>
+        <p class="text-muted">Guarde toda la información de su ganado, cabeza por cabeza</p>
+      </div>
+
+      <div class="d-flex flex-column gap-2">
+
+        <h4 class="fw-semibold mb-0">Contacto con interesados</h4>
+        <p class="text-muted">Encuentre personas interesadas en su ganado</p>
+      </div>
+
+      <div class="d-flex flex-column gap-2">
+        <h4 class="fw-semibold mb-0">Administración por finca o hato</h4>
+        <li class="text-muted">Puedes agregar nuevas fincas a tu registro</li>
+        <li class="text-muted">Agrega a un potrero a tu finca</li>
+        <li class="text-muted">Agrega cabezas de ganados especificos</li>
+
+      </div>
+
+      <div class="d-flex flex-column gap-2">
+        <h4 class="fw-semibold mb-0">Búsquedas personalizadas</h4>
+        <p class="text-muted">¿Está buscando una raza de ganado específica o en un lugar específico?, con las búsquedas
+          personalizadas podrá filtrar por estas y más características según su interés</p>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Tarjetas Custom -->
+<div class="container px-4 py-1" id="ventajas">
+  <h2 class="pb-2 border-bottom border-dark">Ventajas de BoviApp</h2>
+
+  <div class="row row-cols-1 row-cols-lg-3 align-items-stretch g-4 py-1">
+    <div class="col">
+      <div class="card card-cover h-100 overflow-hidden text-bg-dark rounded-4 shadow-lg"
+        style="background-image:url('{% static " img/ganadero_1.jpg" %}');">
+        <div class="d-flex flex-column h-100 p-5 pb-3 text-white text-shadow-1">
+          <h3 class="pt-5 mt-5 mb-4 display-6 lh-1 fw-bold">Gratis, y siempre con usted</h3>
+          <ul class="d-flex list-unstyled mt-auto">
+            <li class="me-auto">
+              <img src="{% static 'img/boviapp_logo_secondary.png'%}" alt="Boviapp" width="32" height="32"
+                class="rounded-circle border border-white">
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card card-cover h-100 overflow-hidden text-bg-dark rounded-4 shadow-lg"
+        style="background-image: url('{% static " img/ganadero_2.jpg"%}');">
+        <div class="d-flex flex-column h-100 p-5 pb-3 text-white text-shadow-1">
+          <h3 class="pt-5 mt-5 mb-4 display-6 lh-1 fw-bold">Administre su ganado, desde cualquier lugar</h3>
+          <ul class="d-flex list-unstyled mt-auto">
+            <li class="me-auto">
+              <img src="{% static 'img/boviapp_logo_secondary.png'%}" alt="Boviapp" width="32" height="32"
+                class="rounded-circle border border-white">
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card card-cover h-100 overflow-hidden text-bg-dark rounded-4 shadow-lg"
+        style="background-image:url('{% static " img/ganadero_3.jpg"%}');">
+        <div class="d-flex flex-column h-100 p-5 pb-3 text-white text-shadow-1">
+          <h3 class="pt-5 mt-5 mb-4 display-6 lh-1 fw-bold">Registre cada raza de ganado que posea</h3>
+          <ul class="d-flex list-unstyled mt-auto">
+            <li class="me-auto">
+              <img src="{% static 'img/boviapp_logo_secondary.png'%}" alt="Boviapp" width="32" height="32"
+                class="rounded-circle border border-white">
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- aqui termina ventajas-->
+{% endif %}
+{% endblock %}
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const spinner = document.getElementById('loading-spinner');
+    const razaOptions = document.getElementById('raza-options');
+
+    spinner.style.display = 'block';
+
+    setTimeout(() => {
+      spinner.style.display = 'none';
+      razaOptions.style.display = 'block';
+    }, 2000);
+  });
+</script>

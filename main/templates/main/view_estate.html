@@ -1,0 +1,53 @@
+{% extends 'main/base_generic.html' %}
+{% load static %}
+
+{% block title %}{{ finca.nombre_finca }}{% endblock %}
+
+
+{% block content %}            
+
+
+
+<div class="d-flex flex-column align-items-center" style="height: 90%;">
+    <h2 class="p-4">{{ finca.nombre_finca }}</h2>
+    <div class="container-sm border rounded form-inline card">
+        <h3 class="card-title">Información de contacto</h3>
+        <div class="card-body">
+            Dirección: {{ finca.direccion }}
+            <br>
+            Teléfono: {{ finca.telefono }}
+            <br>
+            Dirección de persona encargada: {{ finca.direccion_encargado }}
+        </div>
+    </div>
+    <br>
+    <a class="btn btn-primary" href="{% url 'update_estate' estate_id=finca.id %}" role="button">Editar finca</a>
+    <br>
+    <div class="container-sm border card">
+        <h3 class="card-title">Ganado asociado</h3>
+        <table class="table table-responsive-md table-hover table-bordered">
+            <caption>Listado de ganado en {{ finca.nombre_finca }}</caption>
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Cabeza</th>
+                <th scope="col">Lote</th>
+                <th scope="col">Potrero</th>
+              </tr>
+            </thead>
+            <tbody> 
+                {% for i in vaquitas %} 
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td><a href="{% url 'cattle_info' cattle_id=i.cabeza_ganado.id %}">{{ i.cabeza_ganado.id }}</a></td>
+                    <td>{{ i.lote }}</td>
+                    <td>{{ i.potrero }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+    </div>
+    <a class="btn btn-primary" href="{% url 'new_cattle' %}" role="button">Nueva vaca</a>
+</div>
+
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'main/base_generic.html' %}
+{% load static %}
+
+{% block content %}
+<div>
+    <div class="container px-4 py-1 align-items-center rounded justify-content-center" id="busqueda">
+        <div class="row row-cols-1 row-cols-lg-1 align-items-stretch g-4 py-1">
+            <form id="breedForm" action="{% url 'buscar_vacas' %}" method="POST">
+                {% csrf_token %}
+                <label for="busq_raza" id="title_busq_raza">Busqueda por raza de ganado</label>
+                <select id="busq_raza" name="raza" class="form-select" required>
+                    <option value="" selected disabled>--Seleccione una--</option>
+                    {% for i in breeds %}
+                    <option value="{{ i.id }}">{{ i.nombre_raza }}</option>
+                    {% endfor %}
+                </select>
+                <input type="submit" value="Buscar" class="btn btn-primary btn-lg">
+            </form>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Function to show notification with optional type
+        function showNotification(message, type = 'success') {
+            const notificationElement = document.getElementById('notification');
+            notificationElement.className = `notification ${type}`;
+            notificationElement.textContent = message;
+            notificationElement.style.display = 'block';
+
+            setTimeout(() => {
+                notificationElement.style.display = 'none';
+            }, 3000); // Ocultar después de 3 segundos
+        }
+
+        // Submit event listener for the form
+        document.getElementById('breedForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const breedName = document.getElementById('busq_raza').value.trim();
+
+            // Check if breed name is empty
+            if (breedName) {
+                // Submit the form using Django's form handling (assuming server-side validation)
+                this.submit(); // Submit the form after validation
+                showNotification('La nueva raza se ha registrado correctamente.');
+            } else {
+                showNotification('El nombre de la raza no puede estar vacío.', 'error');
+            }
+        });
+    </script>
+</div>
+{% endblock %}

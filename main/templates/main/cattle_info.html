@@ -1,0 +1,57 @@
+{% extends 'main/base_generic.html' %}
+{% load static %}
+
+{% block title %}Hoja de vida{% endblock %}
+
+
+{% block content %}
+        <div class="d-flex flex-column align-items-center" style="height: 90%;">
+        <div class="container-sm border card">
+        <table class="table table-responsive-md table-hover table-bordered">
+            <th>ID</th>
+            <th>Raza</th>
+            <th>Dueno</th>
+            <th>Peso (en kg) </th>
+            <th>Fecha de nacimiento</th>
+            <th>Tipo de producción</th>
+            {% if usuario.tipo.pk != 1 %}
+            <th>Dueño</th>
+            {% endif %}            
+            <tr>
+                <td> {{ datos_vaca.id }} </td>
+                <td> {{ nombre_raza}} </td>
+                <td> {{ datos_vaca.customer_name }} </td>
+                <td> {{ datos_vaca.peso_kg }} </td>
+                <td> {{ datos_vaca.fecha_nacimiento }} </td>
+                <td> {{ tipo_ganado }} </td>
+                {% if usuario.tipo.pk != 1 %}
+                <td> <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Buscar</button> </td>
+                {% endif %}
+            </tr>
+        </table>
+        </div>
+        <a class="btn btn-primary" href="{% url 'update_cattle' cattle_id=datos_vaca.id %}" role="button">Editar vaca</a>
+    </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Información de contacto</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            Nombre: {{ owner_fullname }}
+            <br>
+            Teléfono: {{ owner.telefono }}
+            <br>
+            Dirección: {{ owner.direccion }}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registrar Nueva Raza</title>
+    <style>
+        body {
+            background-color: #FAFCBF;
+            font-family: Arial, sans-serif;
+        }
+        button, input, label {
+            padding: 10px;
+            margin: 10px;
+            border-radius: 10px;
+        }
+        input {
+            border: solid 1px #CED4DA;
+        }
+        button {
+            background-color: #261901;
+            color: white;
+            width: 150px;
+            max-width: 90%;
+        }
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #fff; /* Fondo blanco */
+            color: #333; /* Texto oscuro para buen contraste */
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+            width: 250px; /* Tamaño fijo para las notificaciones */
+            font-size: 14px;
+            text-align: center;
+        }
+        .notification.success {
+            border-left: 5px solid #4CAF50; /* Borde verde para éxito */
+        }
+        .notification.error {
+            border-left: 5px solid #f44336; /* Borde rojo para error */
+        }
+    </style>
+</head>
+<body>
+    <h1>Registrar Nueva Raza de Ganado</h1>
+    <div id="notification" class="notification"></div>
+
+    <form id="breedForm" method="post">
+        {% csrf_token %}
+        <label for="inputBreedName">Nombre de la Raza:</label><br/>
+        <input type="text" id="inputBreedName" name="inputBreedName" placeholder="Nombre de la nueva raza" maxlength="30" minlength="3"><br/>
+        <button type="submit">Registrar</button>
+    </form>
+
+    <script>
+        // Function to show notification with optional type
+        function showNotification(message, type = 'success') {
+            const notificationElement = document.getElementById('notification');
+            notificationElement.className = `notification ${type}`;
+            notificationElement.textContent = message;
+            notificationElement.style.display = 'block';
+
+            setTimeout(() => {
+                notificationElement.style.display = 'none';
+            }, 3000); // Ocultar después de 3 segundos
+        }
+
+        // Submit event listener for the form
+        document.getElementById('breedForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const breedName = document.getElementById('inputBreedName').value.trim();
+
+            // Check if breed name is empty
+            if (breedName) {
+                // Submit the form using Django's form handling (assuming server-side validation)
+                this.submit(); // Submit the form after validation
+                showNotification('La nueva raza se ha registrado correctamente.');
+            } else {
+                showNotification('El nombre de la raza no puede estar vacío.', 'error');
+            }
+
+            // Clean the input field even if submission fails (optional)
+            document.getElementById('inputBreedName').value = '';
+        });
+    </script>
+</body>
+</html>

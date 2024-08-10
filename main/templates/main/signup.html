@@ -1,0 +1,84 @@
+{% extends 'main/base_generic.html' %}
+{% load static %}
+
+{% block title %}Registrarse{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column align-items-center" style="height: 90%;">
+    <h2 class="p-4">¡Regístrese!</h2>
+    <br/>
+
+    <div class="alert-container">
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <div {% if message.tags %} class="{{message.tags}} alert alert-dismissible alert-danger"{% endif %}>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <h4 class="alert-heading">¡Cuidado!</h4>
+                <p class="mb-0">{{ message }}</p>
+            </div>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+
+    <br/>
+    <div class="container-sm rounded form-inline card">
+        <form action="{% url 'signup' %}" method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="idFirstName">Nombres</label>
+                <input type="text" class="form-control" id="idFirstName" name="inputFirstName" placeholder="Plinio" aria-describedby="help" required>
+            </div>
+            <div class="form-group">
+                <label for="idLastName">Apellidos</label>
+                <input type="text" class="form-control" id="idLastName" name="inputLastName" placeholder="Marín" aria-describedby="help" required>
+            </div>
+            <div class="form-group">
+                <label for="idEmail">Correo Electrónico</label>
+                <input type="email" class="form-control" id="idEmail" name="inputEmail" placeholder="PlinioOlivoMarin@ejemplo.com" aria-describedby="help" required>
+            </div>
+            <div class="form-group">
+                <label for="idPassword">Contraseña</label>
+                <input type="password" class="form-control" id="idPassword" name="inputPassword" placeholder="***************" aria-describedby="help" required>
+            </div>
+            <div class="form-group">
+                <label for="idPhone">Teléfono</label>
+                <input type="text" class="form-control" id="idPhone" name="inputPhone" placeholder="3130000000" aria-describedby="help" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            </div>
+            <div class="form-group">
+                <label id="idAddress">Dirección</label>
+                <input type="text" class="form-control" id="idAddress" name="inputAddress" placeholder="KR 0 # 0 - 45" aria-describedby="help">
+            </div>
+            <div>
+                <h6>Soy:</h6>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="inputType" id="ganadero-id" value="1" checked />
+                    <label class="form-check-label" for="ganadero-id">Ganadero</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="inputType" id="personaX-id" value="2" />
+                    <label class="form-check-label" for="personaX-id">Persona común</label>
+                </div>
+            </div>
+            <br>
+            <button type="submit" class="btn btn-primary">Registrarse</button>
+        </form>
+        <br>
+        <small>¿Ya tiene una cuenta? <a href="{% url 'our_login' %}">Iniciar sesión</a></small>
+    </div>
+</div>
+
+<style>
+    .alert-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 300px;
+        z-index: 1050;
+    }
+</style>
+
+
+{% endblock %}
