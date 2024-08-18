@@ -16,6 +16,13 @@ from django.db import IntegrityError
 from django.contrib.auth.models import User
 from .models import Usuario, TipoUsuario
 from django.http import JsonResponse
+from flask import Flask, request, jsonify, render_template
+import pandas as pd
+import pickle
+import os
+import json
+from django.views.decorators.csrf import csrf_exempt
+
 
 # Create your views here.
 def index(request):
@@ -358,3 +365,72 @@ def buscarganado(request):
     
     # Renderiza la página de búsqueda
     return render(request, 'main/buscarganado.html')
+
+# Cargar el modelo una vez al inicio del servidor
+
+model = pickle.load(open("model.pkl","rb"))
+@csrf_exempt 
+def predict(request):
+    if request.method == "POST":
+        if request.content_type == 'application/json':
+            try:
+                # Cargar los datos JSON desde el cuerpo de la solicitud
+                json_data = json.loads(request.body)
+                
+                # Imprimir los datos recibidos para depuración
+                print("Datos JSON recibidos:", json_data)
+                
+                # Convertir los datos JSON en un DataFrame
+                data = pd.DataFrame([json_data])
+                
+                # Imprimir las columnas del DataFrame para depuración
+                print("Columnas del DataFrame:", data.columns)
+                
+                # Verificar que los nombres de las columnas coincidan
+                required_columns = [
+                    'DIM( Days In Milk)', 'Avg(7 days). Daily MY( L )', 
+                    'Kg. milk 305 ( Kg )', 'Fat (%)', 'SNF (%)', 
+                    'Density ( Kg/ m3', 'Protein (%)', 'Conductivity (mS/cm)', 
+                    'pH', 'Freezing point (⁰C)', 'Salt (%)', 'Lactose (%)'
+                ]
+                
+                # Revisar si las columnas requeridas están presentes en el DataFrame
+                missing_columns = [col for col in required_columns if col not in data.columns]
+                if missing_columns:
+                    return JsonResponse({"error": f"Faltan columnas en los datos: {', '.join(missing_columns)}"}, status=400)
+                
+                query_df = data[required_columns]
+                prediction = model.predict(query_df)
+                
+                return JsonResponse({"Prediction": list(prediction.astype(str))}, status=200)
+            except Exception as e:
+                return JsonResponse({"error": str(e)}, status=400)
+        else:
+            return JsonResponse({"error": "Request is not in JSON format"}, status=400)
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+def predict_csv(request):
+    if request.method == "POST":
+        if 'csv_file' not in request.FILES:
+            return JsonResponse({"error": "No file part"}, status=400)
+
+        file = request.FILES['csv_file']
+
+        if file.name == '':
+            return JsonResponse({"error": "No selected file"}, status=400)
+        
+        try:
+            data = pd.read_excel(file)
+            query_df = data[['DIM( Days In Milk)','Avg(7 days). Daily MY( L )', 'Kg. milk 305 ( Kg )', 'Fat (%)' , 'SNF (%)', 'Density ( Kg/ m3','Protein (%)','Conductivity (mS/cm)','pH','Freezing point (⁰C)','Salt (%)','Lactose (%)']]
+            index_df = data['Sample No']
+            prediction = model.predict(query_df)
+            return JsonResponse({"Sample No": list(index_df.astype(str)), "Prediction": list(prediction.astype(str))}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+def prediction_view(request):
+    context = {'user': request.user}
+    return render(request, "main/predict.html",context)
+
+    

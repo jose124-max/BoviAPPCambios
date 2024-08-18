@@ -1,6 +1,7 @@
 from django.urls import path, include
 
 from . import views
+from .views import predict, predict_csv,prediction_view
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -20,4 +21,7 @@ urlpatterns = [
     path('update_estate/<int:estate_id>', views.update_estate, name='update_estate'),
     path('new_breed/', views.new_breed, name='new_breed'),
     path('buscarganado/', views.buscarganado, name='buscar_ganado'),
+    path('predict/', predict, name='predict'),
+    path('predict/csv/', predict_csv, name='predict_csv'),
+    path('predictview/', views.prediction_view, name='predictview'),
 ]
