@@ -4,62 +4,84 @@
 {% block title %}Mis fincas{% endblock %}
 
 {% block content %}
+<h3 class="card-title text-center">Detalles</h3>
 <div class="d-flex flex-column align-items-center" style="height: 90%;">
-  <div class="container-sm border card">
-    <h3 class="card-title">Mis fincas</h3>
-    <table class="table table-responsive-md table-hover table-bordered">
-      <thead>
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">Nombre</th>
-          <th scope="col">Dirección</th>
-          <th scope="col">Teléfono</th>
-          <th scope="col">Accion</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for i in estates %}
-        <tr>
-          <th scope="row">{{ forloop.counter }}</th>
-          <td><a href="{% url 'view_estate' estate_id=i.id %}">{{i.nombre_finca}}</a></td>
-          <td>{{i.direccion}}</td>
-          <td>{{i.telefono}}</td>
-          <td><button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#vincularModal"
-              data-estate-id="{{i.id}}">Vincular ganado</button></td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <div class="scrollable-container">
+    <br>
+    <div class="text-end mt-3 me-4"> 
+      <a class="btn btn-primary" href="{% url 'new_estate' %}" role="button">Nueva finca</a>
+    </div>
+    <br>
+    <div class="container-sm border card">
+      <h3 class="card-title">Mis fincas</h3>
+      <table class="table table-responsive-md table-hover table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Dirección</th>
+            <th scope="col">Teléfono</th>
+            <th scope="col">Accion</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in estates %}
+          <tr>
+            <th scope="row">{{ forloop.counter }}</th>
+            <td><a href="{% url 'view_estate' estate_id=i.id %}">{{i.nombre_finca}}</a></td>
+            <td>{{i.direccion}}</td>
+            <td>{{i.telefono}}</td>
+            <td><button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#vincularModal"
+                data-estate-id="{{i.id}}">Vincular ganado</button></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <br>
+
+    <br>
+    <br>
+    <div class="text-end mt-1 me-4"> 
+      <a class="btn btn-primary" href="{% url 'new_cattle' %}" role="button">Nueva vaca</a>
+    </div>
+    <br>
+    {% for estate, cattle in cattle_by_estate.items %}
+    <div class="container-sm border card">
+      <h3 class="card-title">Ganado asociado a {{ estate.nombre_finca }}</h3>
+      <div class="table-container">
+        <table class="table table-responsive-md table-hover table-bordered">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Cabeza</th>
+              <th scope="col">Lote</th>
+              <th scope="col">Potrero</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cattle_item in cattle %}
+            <tr>
+              <th scope="row">{{ forloop.counter }}</th>
+              <td><a
+                  href="{% url 'cattle_info' cattle_id=cattle_item.cabeza_ganado.id %}">{{cattle_item.cabeza_ganado.id}}</a>
+              </td>
+              <td>{{ cattle_item.lote }}</td>
+              <td>{{ cattle_item.potrero }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="4">No hay ganado asociado a esta finca.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <br>
+    {% endfor %}
+    <br>
   </div>
-  <br>
-  <a class="btn btn-primary" href="{% url 'new_estate' %}" role="button">Nueva finca</a>
-  <br>
-  <div class="container-sm border card">
-    <h3 class="card-title">Ganado asociado</h3>
-    <table class="table table-responsive-md table-hover table-bordered">
-      <caption>Listado de ganado en {{ finca.nombre_finca }}</caption>
-      <thead>
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">Cabeza</th>
-          <th scope="col">Lote</th>
-          <th scope="col">Potrero</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for i in vaquitas %}
-        <tr>
-          <th scope="row">{{ forloop.counter }}</th>
-          <td><a href="{% url 'cattle_info' cattle_id=i.cabeza_ganado.id %}">{{ i.cabeza_ganado.id }}</a></td>
-          <td>{{ i.lote }}</td>
-          <td>{{ i.potrero }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  <br>
-  <a class="btn btn-primary" href="{% url 'new_cattle' %}" role="button">Nueva vaca</a>
 </div>
 
 <!-- Modal -->

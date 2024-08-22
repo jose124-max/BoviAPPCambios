@@ -24,4 +24,8 @@ urlpatterns = [
     path('predict/', predict, name='predict'),
     path('predict/csv/', predict_csv, name='predict_csv'),
     path('predictview/', views.prediction_view, name='predictview'),
+    path('cattle-info-by-user/<str:username>/', views.cattle_info_by_user, name='cattle-info-by-user'),
+    path('delete_cattle/', views.delete_cattle, name='delete_cattle'),
+    path('delete_estate/', views.delete_estate, name='delete_estate'),
+    path('new_funcion/', views.new_breed, name='new_funcion'),
 ]

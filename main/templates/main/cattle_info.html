@@ -30,7 +30,8 @@
             </tr>
         </table>
         </div>
-        <a class="btn btn-primary" href="{% url 'update_cattle' cattle_id=datos_vaca.id %}" role="button">Editar vaca</a>
+        <a class="btn btn-primary mb-2" href="{% url 'update_cattle' cattle_id=datos_vaca.id %}" role="button">Editar vaca</a>
+        <button class="btn btn-danger mb-2" data-bs-toggle="modal" data-bs-target="#deleteModal" data-cattle-id="{{ datos_vaca.id }}">Eliminar vaca</button>
     </div>
 
   <!-- Modal -->
@@ -54,4 +55,39 @@
       </div>
     </div>
   </div>
+
+<!-- Modal para confirmar eliminación -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Confirmar eliminación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ¿Estás seguro de que deseas eliminar esta vaca?
+      </div>
+      <div class="modal-footer">
+        <form method="post" action="{% url 'delete_cattle' %}">
+          {% csrf_token %}
+          <input type="hidden" id="cattleId" name="cattle_id" value="">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger">Eliminar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', (event) => {
+    const deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', (event) => {
+      const button = event.relatedTarget;
+      const cattleId = button.getAttribute('data-cattle-id');
+      const cattleInput = deleteModal.querySelector('#cattleId');
+      cattleInput.value = cattleId;
+    });
+  });
+</script>
 {% endblock %}

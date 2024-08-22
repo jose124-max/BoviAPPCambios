@@ -3,51 +3,71 @@
 
 {% block title %}{{ finca.nombre_finca }}{% endblock %}
 
-
-{% block content %}            
-
-
-
+{% block content %}
 <div class="d-flex flex-column align-items-center" style="height: 90%;">
-    <h2 class="p-4">{{ finca.nombre_finca }}</h2>
-    <div class="container-sm border rounded form-inline card">
-        <h3 class="card-title">Información de contacto</h3>
-        <div class="card-body">
-            Dirección: {{ finca.direccion }}
-            <br>
-            Teléfono: {{ finca.telefono }}
-            <br>
-            Dirección de persona encargada: {{ finca.direccion_encargado }}
-        </div>
-    </div>
-    <br>
-    <a class="btn btn-primary" href="{% url 'update_estate' estate_id=finca.id %}" role="button">Editar finca</a>
-    <br>
-    <div class="container-sm border card">
-        <h3 class="card-title">Ganado asociado</h3>
-        <table class="table table-responsive-md table-hover table-bordered">
-            <caption>Listado de ganado en {{ finca.nombre_finca }}</caption>
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Cabeza</th>
-                <th scope="col">Lote</th>
-                <th scope="col">Potrero</th>
-              </tr>
-            </thead>
-            <tbody> 
-                {% for i in vaquitas %} 
+    <h2 class="mb-4">{{ finca.nombre_finca }}</h2>
+    
+    <!-- Información de la finca en formato de tabla -->
+    <div class="container-sm border rounded card mb-4">
+        <h3 class="card-title p-3">Información de contacto</h3>
+        <table class="table table-striped">
+            <tbody>
                 <tr>
-                    <th scope="row">{{ forloop.counter }}</th>
-                    <td><a href="{% url 'cattle_info' cattle_id=i.cabeza_ganado.id %}">{{ i.cabeza_ganado.id }}</a></td>
-                    <td>{{ i.lote }}</td>
-                    <td>{{ i.potrero }}</td>
+                    <th class="w-50">Nombre</th>
+                    <td>{{ finca.nombre_finca }}</td>
                 </tr>
-                {% endfor %}
+                <tr>
+                    <th>Dirección</th>
+                    <td>{{ finca.direccion }}</td>
+                </tr>
+                <tr>
+                    <th>Teléfono</th>
+                    <td>{{ finca.telefono }}</td>
+                </tr>
+                <tr>
+                    <th>Dirección de persona encargada</th>
+                    <td>{{ finca.direccion_encargado }}</td>
+                </tr>
             </tbody>
-          </table>
+        </table>
     </div>
-    <a class="btn btn-primary" href="{% url 'new_cattle' %}" role="button">Nueva vaca</a>
+
+    <a class="btn btn-primary mb-2" href="{% url 'update_estate' estate_id=finca.id %}" role="button">Editar finca</a>
+    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-finca-id="{{ finca.id }}">Eliminar finca</button>
 </div>
 
+<!-- Modal de confirmación de eliminación -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel">Confirmar eliminación</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          ¿Estás seguro de que deseas eliminar esta finca? Esta acción no se puede deshacer.
+        </div>
+        <div class="modal-footer">
+          <form id="deleteForm" method="POST" action="{% url 'delete_estate' %}">
+            {% csrf_token %}
+            <input type="hidden" id="fincaId" name="finca_id" value="">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-danger">Eliminar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+      const deleteModal = document.getElementById('deleteModal');
+      deleteModal.addEventListener('show.bs.modal', (event) => {
+        const button = event.relatedTarget;
+        const fincaId = button.getAttribute('data-finca-id');
+        const fincaInput = deleteModal.querySelector('#fincaId');
+        fincaInput.value = fincaId;
+      });
+    });
+  </script>
 {% endblock %}

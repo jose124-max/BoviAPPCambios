@@ -22,7 +22,7 @@ import pickle
 import os
 import json
 from django.views.decorators.csrf import csrf_exempt
-
+from django.shortcuts import get_object_or_404, redirect
 
 # Create your views here.
 def index(request):
@@ -122,12 +122,13 @@ def new_cattle(request):
                                         lote=int(request.POST['inputLot']),
                                         potrero=int(request.POST['inputPaddock']))
         associated_estate.save()
+        messages.success(request, 'La vaca se ha creado exitosamente.')
+        return redirect('my_estates')
     breeds = RazaGanado.objects.all()
     cow_types = TipoGanado.objects.all()
     estates = Finca.objects.all().filter(usuario=Usuario.objects.get(user=request.user))
     context = {'breeds': breeds, 'cow_types': cow_types, 'estates': estates}
-    return render(request, 'main/new_cattle.html', context)
-
+    return render(request, 'main/new_cattle.html', context)    
 
 def new_estate(request):
     if not request.user.is_authenticated or Usuario.objects.get(user=request.user).tipo != TipoUsuario.objects.get(pk=1):
@@ -152,6 +153,7 @@ def new_estate(request):
                       direccion_encargado=request.POST["inputStewardAddress"]
                       )
         finca.save()
+        return redirect('my_estates')
         estates = Finca.objects.all().filter(usuario=Usuario.objects.get(user=request.user))
         breeds = RazaGanado.objects.all()  # Ajusta esto según tu modelo real
         cow_types = TipoGanado.objects.all()  # Ajusta esto según tu modelo real
@@ -196,16 +198,24 @@ def my_estates(request):
     if not request.user.is_authenticated or Usuario.objects.get(user=request.user).tipo != TipoUsuario.objects.get(pk=1):
         return HttpResponseRedirect('/')
     
-    estates = Finca.objects.all().filter(usuario=Usuario.objects.get(user=request.user))
-    breeds = RazaGanado.objects.all()  # Ajusta esto según tu modelo real
-    cow_types = TipoGanado.objects.all()  # Ajusta esto según tu modelo real
+    usuario = Usuario.objects.get(user=request.user)
+    estates = Finca.objects.filter(usuario=usuario)
+    
+    cattle_by_estate = {}
+    for estate in estates:
+        cattle = GanadoFinca.objects.filter(finca=estate)
+        cattle_by_estate[estate] = cattle
+    
+    breeds = RazaGanado.objects.all()
+    cow_types = TipoGanado.objects.all()
     
     context = {
         'estates': estates,
         'user': request.user,
-        'usuario': Usuario.objects.get(user=request.user),
+        'usuario': usuario,
         'breeds': breeds,
-        'cow_types': cow_types
+        'cow_types': cow_types,
+        'cattle_by_estate': cattle_by_estate,
     }
     return render(request, 'main/my_estates.html', context)
 
@@ -346,10 +356,12 @@ def new_breed(request):
         if breed_name:
             raza = RazaGanado(nombre_raza=breed_name)
             raza.save()
+            messages.success(request, 'La raza se ha creado exitosamente.')
             return HttpResponseRedirect('/new_breed')  # Redirigir para evitar reenvío del formulario
         else:
             messages.add_message(request, level=messages.WARNING, message='El nombre de la raza no puede estar vacío.')
-    return render(request, 'main/new_breed.html')
+    context={'usuario':Usuario.objects.get(user=request.user)}
+    return render(request, 'main/new_funcion.html', context)
 
 def buscarganado(request):
     # Verifica si el usuario tiene el tipo adecuado
@@ -433,4 +445,52 @@ def prediction_view(request):
     context = {'user': request.user}
     return render(request, "main/predict.html",context)
 
+def cattle_info_by_user(request, username):
+    usuario = Usuario.objects.get(user__username=username)
+    fincas = usuario.finca_set.all()
+    lista_contexto = []
+    for finca in fincas:
+        ganado_finca = GanadoFinca.objects.filter(finca=finca)
+        for gf in ganado_finca:
+            cabeza_de_ganado = gf.cabeza_ganado
+            context = {
+                "datos_vaca": cabeza_de_ganado,
+                "nombre_raza": cabeza_de_ganado.raza.nombre_raza,
+                "tipo_ganado": cabeza_de_ganado.tipo.nombre_tipo,
+                "owner": usuario,
+                "owner_fullname": usuario.user.get_full_name(),
+                'user': request.user,
+                'usuario': usuario
+            }
+            lista_contexto.append(context)
+    return render(request, "main/cattle_info.html", {"cattle_list": lista_contexto})
+
+def delete_cattle(request):
+    if not request.user.is_authenticated or Usuario.objects.get(user=request.user).tipo != TipoUsuario.objects.get(pk=1):
+        return HttpResponseRedirect('/')
+
+    if request.method == "POST":
+        cattle_id = request.POST.get('cattle_id')
+        if cattle_id:
+            vaquita = get_object_or_404(CabezaGanado, pk=cattle_id)
+            vaquita.delete()
+            messages.success(request, 'La vaca ha sido eliminada con éxito.')
+            return redirect('my_estates')  # Cambia 'my_estates' por el nombre correcto de tu vista
+        
+def delete_estate(request):
+    if not request.user.is_authenticated or Usuario.objects.get(user=request.user).tipo != TipoUsuario.objects.get(pk=1):
+        # Si no inició sesión o inició como un no-ganadero, redirigir al index
+        return HttpResponseRedirect('/')
+    
+    finca_id = request.POST.get('finca_id')
+    finca = get_object_or_404(Finca, pk=finca_id)
+    
+    # Eliminar la finca
+    finca.delete()
+    
+    # Agregar un mensaje de éxito
+    messages.success(request, "Finca eliminada exitosamente.")
+    
+    # Redirigir a la página de listado de fincas
+    return redirect('my_estates')
     
