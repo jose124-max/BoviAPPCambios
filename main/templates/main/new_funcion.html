@@ -8,7 +8,7 @@
 
 <form id="breedForm" method="post">
     {% csrf_token %}
-    <label for="inputBreedName">Nombre de la Raza:</label><br />
+    <label for="inputBreedName" style="margin-bottom: 5px;">Nombre de la Raza:</label><br />
     <input type="text" id="inputBreedName" name="inputBreedName" placeholder="Nombre de la nueva raza" maxlength="30"
         minlength="3"><br />
     <button type="submit" class="btn-black">Registrar</button>
@@ -85,14 +85,14 @@
         font-size: 1rem;
         border: 1px solid #ccc;
         border-radius: 5px;
-        width: 40%;
+        width: 100%;
         margin-bottom: 15px;
     }
 
     .btn-black {
         background-color: black;
         color: white;
-        padding: 10px 20px;
+        padding: 5px 20px;
         border: none;
         border-radius: 5px;
         cursor: pointer;

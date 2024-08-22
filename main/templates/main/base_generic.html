@@ -19,9 +19,22 @@
 
     {% block styles %}
     <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content {
+            flex: 1;
+        }
+
         .table-container {
             max-height: 300px;
-            /* Ajusta este valor según tus necesidades */
             overflow-y: auto;
             margin-bottom: 20px;
         }
@@ -31,7 +44,7 @@
         }
 
         .scrollable-container {
-            max-height: 85vh;
+            max-height: 500px;
             overflow-y: auto;
             width: 100%;
         }

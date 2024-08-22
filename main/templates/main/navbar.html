@@ -12,7 +12,7 @@
       <li><a href="{% url 'my_estates' %}" class="nav-link px-2 link-dark">Mis fincas</a></li>
       <li><a href="/" class="nav-link px-2 link-dark">Mi ganado</a></li>
       <li><a href="{% url 'predictview' %}" class="nav-link px-2 link-dark">Detectar mastitis</a></li>
-      <li><a href="{% url 'new_funcion' %}" class="nav-link px-2 link-dark">Agregar funciones</a></li>
+      <li><a href="{% url 'new_funcion' %}" class="nav-link px-2 link-dark">Razas de ganado</a></li>
       {% elif user.is_authenticated and usuario.tipo.pk != 1 %}
       {% else %}
       <li><a href="#ventajas" class="nav-link px-2 link-dark">Ventajas</a></li>
