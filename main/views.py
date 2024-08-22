@@ -24,6 +24,7 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404, redirect
 from django.db.models.deletion import RestrictedError
+from django.db.models import ProtectedError
 
 # Create your views here.
 def index(request):
@@ -109,27 +110,33 @@ def signup(request):
 
 def new_cattle(request):
     if not request.user.is_authenticated or Usuario.objects.get(user=request.user).tipo != TipoUsuario.objects.get(pk=1):
-        # Si no inició sesión o inició como un no-ganadero, redirigir al index
         return HttpResponseRedirect('/')
+
     if request.method == "POST":
-        vaquita = CabezaGanado(customer_name=request.POST['inputCustomerName'],
-                               peso_kg=float(request.POST['inputWeight']),
-                               fecha_nacimiento=request.POST['inputBirthdate'],
-                               tipo=TipoGanado.objects.get(pk=int(request.POST['inputType'])),
-                               raza=RazaGanado.objects.get(pk=int(request.POST['inputBreed'])))
+        vaquita = CabezaGanado(
+            customer_name=request.POST['inputCustomerName'],
+            peso_kg=float(request.POST['inputWeight']),
+            fecha_nacimiento=request.POST['inputBirthdate'],
+            tipo=TipoGanado.objects.get(pk=int(request.POST['inputType'])),
+            raza=RazaGanado.objects.get(pk=int(request.POST['inputBreed'])),
+        )
         vaquita.save()
-        associated_estate = GanadoFinca(cabeza_ganado=vaquita,
-                                        finca=Finca.objects.get(pk=int(request.POST['inputEstate'])),
-                                        lote=int(request.POST['inputLot']),
-                                        potrero=int(request.POST['inputPaddock']))
+        associated_estate = GanadoFinca(
+        cabeza_ganado=vaquita,
+        finca=Finca.objects.get(pk=int(request.POST['inputEstate'])),
+        lote=int(request.POST['inputLot']),
+        potrero=Potrero.objects.get(pk=int(request.POST['inputPaddock'])),
+        )
         associated_estate.save()
         messages.success(request, 'La vaca se ha creado exitosamente.')
         return redirect('my_estates')
+
     breeds = RazaGanado.objects.all()
     cow_types = TipoGanado.objects.all()
+    potreros=Potrero.objects.all()
     estates = Finca.objects.all().filter(usuario=Usuario.objects.get(user=request.user))
-    context = {'breeds': breeds, 'cow_types': cow_types, 'estates': estates}
-    return render(request, 'main/new_cattle.html', context)    
+    context = {'breeds': breeds, 'cow_types': cow_types, 'potreros': potreros,'estates': estates}
+    return render(request, 'main/new_cattle.html', context)
 
 def new_estate(request):
     if not request.user.is_authenticated or Usuario.objects.get(user=request.user).tipo != TipoUsuario.objects.get(pk=1):
@@ -559,12 +566,22 @@ def new_potreros(request):
                 return HttpResponseRedirect('/new_potreros')
             else:
                 messages.warning(request, 'Todos los campos son obligatorios.')
-        
+
         elif 'delete_paddock' in request.POST:  # Para eliminar un potrero
             potrero_id = request.POST.get('delete_paddock')
-            potrero = Potrero.objects.get(pk=potrero_id)
-            potrero.delete()
-            messages.success(request, 'El potrero ha sido eliminado exitosamente.')
+            try:
+                potrero = Potrero.objects.get(pk=potrero_id)
+                # Verificar si el potrero está en uso
+                if GanadoFinca.objects.filter(potrero=potrero).exists():
+                    messages.error(request, 'No se puede eliminar este potrero porque está en uso.')
+                else:
+                    potrero.delete()
+                    messages.success(request, 'El potrero ha sido eliminado exitosamente.')
+            except Potrero.DoesNotExist:
+                messages.error(request, 'El potrero no existe.')
+            except ProtectedError:
+                messages.error(request, 'No se puede eliminar este potrero porque está protegido.')
+
             return HttpResponseRedirect('/new_potreros')
     
     estates = Finca.objects.filter(usuario=Usuario.objects.get(user=request.user))
@@ -575,3 +592,12 @@ def new_potreros(request):
         'potreros': potreros
     }
     return render(request, 'main/new_potrero.html', context)
+
+def get_potreros(request, finca_id):
+    potreros = Potrero.objects.filter(finca_id=finca_id).values('id', 'nombre_potrero')
+    return JsonResponse(list(potreros), safe=False)
+
+def get_potreros_by_finca(request):
+    finca_id = request.GET.get('finca_id')  # Obtén el id de la finca desde el parámetro GET
+    potreros = Potrero.objects.filter(finca_id=finca_id).values('id', 'nombre_potrero')
+    return JsonResponse(list(potreros), safe=False)

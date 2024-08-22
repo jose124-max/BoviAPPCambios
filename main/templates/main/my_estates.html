@@ -8,7 +8,7 @@
 <div class="d-flex flex-column align-items-center" style="height: 90%;">
   <div class="scrollable-container">
     <br>
-    <div class="text-end mt-3 me-4"> 
+    <div class="text-end mt-3 me-4">
       <a class="btn btn-primary" href="{% url 'new_estate' %}" role="button">Nueva finca</a>
     </div>
     <br>
@@ -42,7 +42,7 @@
 
     <br>
     <br>
-    <div class="text-end mt-1 me-4"> 
+    <div class="text-end mt-1 me-4">
       <a class="btn btn-primary" href="{% url 'new_cattle' %}" role="button">Nueva vaca</a>
     </div>
     <br>
@@ -67,7 +67,7 @@
                   href="{% url 'cattle_info' cattle_id=cattle_item.cabeza_ganado.id %}">{{cattle_item.cabeza_ganado.id}}</a>
               </td>
               <td>{{ cattle_item.lote }}</td>
-              <td>{{ cattle_item.potrero }}</td>
+              <td>{{ cattle_item.potrero.nombre_potrero }}</td>
             </tr>
             {% empty %}
             <tr>
@@ -136,8 +136,12 @@
           </div>
           <div class="form-group">
             <label for="idPaddock">Potrero</label>
-            <input type="number" class="form-control" id="idPaddock" name="inputPaddock" placeholder="1234" min="0"
-              step="1" required aria-describedby="help">
+            <select id="idPaddock" name="inputPaddock" class="form-select" required>
+              <option value="" selected disabled>--Seleccione un potrero--</option>
+              {% for i in potreros %}
+              <option value="{{ i.id }}">{{ i.nombre_potrero}}</option>
+              {% endfor %}
+            </select>
           </div>
           <br>
           <button type="submit" class="btn btn-primary">Nueva vaca</button>
@@ -150,16 +154,29 @@
 <script>
   document.addEventListener('DOMContentLoaded', (event) => {
     const vincularModal = document.getElementById('vincularModal');
+
     vincularModal.addEventListener('show.bs.modal', (event) => {
       const button = event.relatedTarget;
       const estateId = button.getAttribute('data-estate-id');
       const estateInput = vincularModal.querySelector('#idEstate');
       estateInput.value = estateId;
+
+      // Realiza la petición AJAX para cargar los potreros de la finca seleccionada
+      fetch(`/get-potreros/${estateId}/`)
+        .then(response => response.json())
+        .then(data => {
+          const paddockSelect = vincularModal.querySelector('#idPaddock');
+          paddockSelect.innerHTML = '<option value="" selected disabled>--Seleccione un potrero--</option>';
+
+          data.forEach(potrero => {
+            const option = document.createElement('option');
+            option.value = potrero.id;
+            option.textContent = potrero.nombre_potrero;
+            paddockSelect.appendChild(option);
+          });
+        })
+        .catch(error => console.error('Error:', error));
     });
-  });
-  document.addEventListener('DOMContentLoaded', function () {
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('idBirthdate').setAttribute('max', today);
   });
 </script>
 {% endblock %}

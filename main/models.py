@@ -45,6 +45,13 @@ class CabezaGanado(models.Model):
     mastitis = models.CharField(max_length=1, choices=TIPO_MASTITIS, default='x')
     
 
+class Potrero(models.Model):
+    nombre_potrero = models.CharField(max_length=50)
+    finca = models.ForeignKey(Finca, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.nombre_potrero
+
 class GanadoFinca(models.Model):
     class Meta:
         constraints = [
@@ -54,7 +61,7 @@ class GanadoFinca(models.Model):
     cabeza_ganado = models.ForeignKey(CabezaGanado, on_delete=models.CASCADE)
     finca = models.ForeignKey(Finca, on_delete=models.CASCADE)
     lote = models.IntegerField()
-    potrero = models.IntegerField()
+    potrero = models.ForeignKey(Potrero, on_delete=models.CASCADE)
 
 
 class Venta(models.Model):
@@ -63,10 +70,3 @@ class Venta(models.Model):
     comprador = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     fecha_venta = models.DateField()
     monto_venta = models.FloatField()
-
-class Potrero(models.Model):
-    nombre_potrero = models.CharField(max_length=50)
-    finca = models.ForeignKey(Finca, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.nombre_potrero

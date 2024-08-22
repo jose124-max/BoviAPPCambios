@@ -29,4 +29,6 @@ urlpatterns = [
     path('delete_estate/', views.delete_estate, name='delete_estate'),
     path('new_funcion/', views.new_breed, name='new_funcion'),
     path('new_potreros/', views.new_potreros, name='new_potreros'),
+    path('get-potreros/<int:finca_id>/', views.get_potreros, name='get_potreros_by_finca'),
+    path('get_potreros/', views.get_potreros_by_finca, name='get_potreros_by_finca'),
 ]
