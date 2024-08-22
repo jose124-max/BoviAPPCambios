@@ -508,4 +508,37 @@ def delete_estate(request):
     
     # Redirigir a la página de listado de fincas
     return redirect('my_estates')
+
+def new_potreros(request):
+    if not request.user.is_authenticated or Usuario.objects.get(user=request.user).tipo != TipoUsuario.objects.get(pk=1):
+        return HttpResponseRedirect('/')
+
+    if request.method == "POST":
+        if 'inputPaddockName' in request.POST:  # Para agregar un nuevo potrero
+            nombre_potrero = request.POST.get('inputPaddockName', '').strip()
+            finca_id = request.POST.get('inputEstate', '')
+
+            if nombre_potrero and finca_id:
+                finca = Finca.objects.get(pk=finca_id)
+                potrero = Potrero(nombre_potrero=nombre_potrero, finca=finca)
+                potrero.save()
+                messages.success(request, 'El potrero se ha creado exitosamente.')
+                return HttpResponseRedirect('/new_potreros')
+            else:
+                messages.warning(request, 'Todos los campos son obligatorios.')
+        
+        elif 'delete_paddock' in request.POST:  # Para eliminar un potrero
+            potrero_id = request.POST.get('delete_paddock')
+            potrero = Potrero.objects.get(pk=potrero_id)
+            potrero.delete()
+            messages.success(request, 'El potrero ha sido eliminado exitosamente.')
+            return HttpResponseRedirect('/new_potreros')
     
+    estates = Finca.objects.filter(usuario=Usuario.objects.get(user=request.user))
+    potreros = Potrero.objects.all()  # Obtener todos los potreros
+    context = {
+        'estates': estates,
+        'usuario': Usuario.objects.get(user=request.user),
+        'potreros': potreros
+    }
+    return render(request, 'main/new_potrero.html', context)

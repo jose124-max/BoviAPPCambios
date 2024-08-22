@@ -1,0 +1,146 @@
+{% extends 'main/base_generic.html' %}
+{% load static %}
+
+{% block title %}Mis potreros{% endblock %}
+
+{% block content %}
+<h4>Registrar Nuevo Potrero</h4>
+
+<div class="container">
+    <form id="paddockForm" method="post" class="text-center">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label for="inputPaddockName" class="form-label">Nombre del Potrero:</label>
+            <input type="text" id="inputPaddockName" name="inputPaddockName" class="form-control form-control-sm"
+                placeholder="Nombre del potrero" maxlength="50" minlength="3" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="inputEstate" class="form-label">Seleccionar Finca:</label>
+            <select id="inputEstate" name="inputEstate" class="form-select form-select-sm" required>
+                <option value="" selected disabled>--Seleccione una finca--</option>
+                {% for estate in estates %}
+                <option value="{{ estate.id }}">{{ estate.nombre_finca }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Registrar Potrero</button>
+        </div>
+    </form>
+</div>
+
+<h4 class="text-center">Lista de Potreros</h4>
+<div class="table-container">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nombre del Potrero</th>
+                <th>Finca</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for potrero in potreros %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ potrero.nombre_potrero }}</td>
+                <td>{{ potrero.finca.nombre_finca }}</td>
+                <td>
+                    <form method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="delete_paddock" value="{{ potrero.id }}">
+                        <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">No hay potreros registrados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    h4 {
+        font-family: 'Arial', sans-serif;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    form {
+        margin: 0 auto;
+        max-width: 500px;
+        padding: 20px;
+        border-radius: 5px;
+    }
+
+    label {
+        font-size: 1rem;
+    }
+
+    input.form-control-sm,
+    select.form-select-sm {
+        padding: 5px;
+        font-size: 0.875rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    .btn-primary {
+        padding: 10px 20px;
+    }
+
+    .btn-black {
+        background-color: black;
+        color: white;
+        padding: 5px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+    .btn-black:hover {
+        background-color: #333;
+    }
+
+    .notification {
+        display: none;
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        text-align: center;
+    }
+
+    .notification.success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .notification.error {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .table-container {
+        max-height: 300px; 
+        overflow-y: auto;
+        width: 70%; 
+        margin: 0 auto; 
+        border: 1px solid #ddd;
+        border-radius: 5px; 
+    }
+
+    table {
+        width: 100%; 
+    }
+</style>
+{% endblock %}

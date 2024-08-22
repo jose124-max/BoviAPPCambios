@@ -57,3 +57,9 @@ class Venta(models.Model):
     fecha_venta = models.DateField()
     monto_venta = models.FloatField()
 
+class Potrero(models.Model):
+    nombre_potrero = models.CharField(max_length=50)
+    finca = models.ForeignKey(Finca, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.nombre_potrero
