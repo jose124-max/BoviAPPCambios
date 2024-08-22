@@ -10,6 +10,16 @@
         <form id="predict-form" action="{% url 'predict' %}" method="POST">
             {% csrf_token %}
             <div class="form-group">
+                <label for="idVaca">Seleccione una vaca</label>
+                <select class="form-control" id="idVaca" name="vaca">
+                    {% for vaca in vacas %}
+                        <option value="{{vaca.id}}">{{ vaca.customer_name }}</option>
+                    {% empty %}
+                        <option value="">No hay vacas disponibles</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
                 <label for="idDIM">DIM (Days In Milk)</label>
                 <input type="number" class="form-control" id="idDIM" name="DIM( Days In Milk)" required>
             </div>
@@ -107,5 +117,6 @@ document.getElementById('predict-form').addEventListener('submit', function(even
         document.getElementById('prediction-result').innerHTML = `<div class="alert alert-danger" role="alert">Error en la predicción.</div>`;
     });
 });
+
 </script>
 {% endblock %}

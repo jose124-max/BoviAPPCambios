@@ -396,40 +396,48 @@ def buscarganado(request):
 # Cargar el modelo una vez al inicio del servidor
 
 model = pickle.load(open("model.pkl","rb"))
-@csrf_exempt 
+@csrf_exempt
 def predict(request):
     if request.method == "POST":
         if request.content_type == 'application/json':
             try:
                 # Cargar los datos JSON desde el cuerpo de la solicitud
                 json_data = json.loads(request.body)
-                
+               
                 # Imprimir los datos recibidos para depuración
                 print("Datos JSON recibidos:", json_data)
-                
+               
                 # Convertir los datos JSON en un DataFrame
                 data = pd.DataFrame([json_data])
-                
+                vaca_id = json_data.get('vaca')
+
                 # Imprimir las columnas del DataFrame para depuración
                 print("Columnas del DataFrame:", data.columns)
-                
+               
                 # Verificar que los nombres de las columnas coincidan
                 required_columns = [
-                    'DIM( Days In Milk)', 'Avg(7 days). Daily MY( L )', 
-                    'Kg. milk 305 ( Kg )', 'Fat (%)', 'SNF (%)', 
-                    'Density ( Kg/ m3', 'Protein (%)', 'Conductivity (mS/cm)', 
+                    'DIM( Days In Milk)', 'Avg(7 days). Daily MY( L )',
+                    'Kg. milk 305 ( Kg )', 'Fat (%)', 'SNF (%)',
+                    'Density ( Kg/ m3', 'Protein (%)', 'Conductivity (mS/cm)',
                     'pH', 'Freezing point (⁰C)', 'Salt (%)', 'Lactose (%)'
                 ]
-                
                 # Revisar si las columnas requeridas están presentes en el DataFrame
                 missing_columns = [col for col in required_columns if col not in data.columns]
                 if missing_columns:
                     return JsonResponse({"error": f"Faltan columnas en los datos: {', '.join(missing_columns)}"}, status=400)
-                
+                print(required_columns)
                 query_df = data[required_columns]
                 prediction = model.predict(query_df)
-                
-                return JsonResponse({"Prediction": list(prediction.astype(str))}, status=200)
+                if vaca_id:
+                    vaca_id = vaca_id.replace('0    ', '')
+                    vaca_id = vaca_id.strip()
+                    try:
+                        vaca = CabezaGanado.objects.get(id=vaca_id)
+                        vaca.mastitis = 'y' if prediction[0] == 1 else 'n'
+                        vaca.save()
+                    except CabezaGanado.DoesNotExist:
+                        return JsonResponse({'error': 'Vaca no encontrada'}, status=404)
+                    return JsonResponse({"Prediction": list(prediction.astype(str))}, status=200)
             except Exception as e:
                 return JsonResponse({"error": str(e)}, status=400)
         else:
@@ -457,8 +465,29 @@ def predict_csv(request):
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
 def prediction_view(request):
-    context = {'user': request.user}
-    return render(request, "main/predict.html",context)
+    # Obtén el usuario autenticado
+    usuario = request.user
+
+    # Obtén el objeto Usuario relacionado con el usuario autenticado
+    try:
+        usuario_info = Usuario.objects.get(user=usuario)
+    except Usuario.DoesNotExist:
+        usuario_info = None
+
+    if usuario_info:
+        # Obtén las fincas asociadas al usuario
+        fincas = Finca.objects.filter(usuario=usuario_info)
+
+        # Obtén todas las vacas asociadas a las fincas del usuario
+        vacas = CabezaGanado.objects.filter(ganadofinca__finca__in=fincas).distinct()
+    else:
+        vacas = CabezaGanado.objects.none()  # Si no hay usuario asociado, no mostrar vacas
+
+    context = {
+        'user': usuario,
+        'vacas': vacas,
+    }
+    return render(request, "main/predict.html", context)
 
 def cattle_info_by_user(request, username):
     usuario = Usuario.objects.get(user__username=username)

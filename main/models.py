@@ -31,11 +31,18 @@ class RazaGanado(models.Model):
 
 
 class CabezaGanado(models.Model):
+    TIPO_MASTITIS = [
+        ('x', 'No Evaluado'),
+        ('y', 'Probable'),
+        ('n', 'No Probable'),
+    ]
+
     tipo = models.ForeignKey(TipoGanado, on_delete=models.RESTRICT)
     raza = models.ForeignKey(RazaGanado, on_delete=models.RESTRICT)
     customer_name = models.CharField(max_length=50)
     peso_kg = models.FloatField()
     fecha_nacimiento = models.DateField()
+    mastitis = models.CharField(max_length=1, choices=TIPO_MASTITIS, default='x')
     
 
 class GanadoFinca(models.Model):

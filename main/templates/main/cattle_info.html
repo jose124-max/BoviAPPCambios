@@ -14,6 +14,7 @@
             <th>Peso (en kg) </th>
             <th>Fecha de nacimiento</th>
             <th>Tipo de producción</th>
+            <th>Verificación de Mastitis</th>
             {% if usuario.tipo.pk != 1 %}
             <th>Dueño</th>
             {% endif %}            
@@ -24,6 +25,17 @@
                 <td> {{ datos_vaca.peso_kg }} </td>
                 <td> {{ datos_vaca.fecha_nacimiento }} </td>
                 <td> {{ tipo_ganado }} </td>
+                <td>
+                  {% if datos_vaca.mastitis == 'x' %}
+                    No se ha evaluado
+                  {% elif datos_vaca.mastitis == 'y' %}
+                    Probablemente tenga mastitis
+                  {% elif datos_vaca.mastitis == 'n' %}
+                    Probablemente no tiene mastitis
+                  {% else %}
+                    Información no disponible
+                  {% endif %}
+                </td>
                 {% if usuario.tipo.pk != 1 %}
                 <td> <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Buscar</button> </td>
                 {% endif %}
