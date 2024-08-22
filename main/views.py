@@ -23,6 +23,7 @@ import os
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404, redirect
+from django.db.models.deletion import RestrictedError
 
 # Create your views here.
 def index(request):
@@ -351,7 +352,6 @@ def new_breed(request):
     if not request.user.is_authenticated or Usuario.objects.get(user=request.user).tipo != TipoUsuario.objects.get(pk=1):
         return HttpResponseRedirect('/')
     
-    # Agregar/Eliminar raza
     if request.method == "POST":
         if 'inputBreedName' in request.POST:  # Para agregar una nueva raza
             breed_name = request.POST.get('inputBreedName', '').strip()
@@ -362,11 +362,15 @@ def new_breed(request):
                 return HttpResponseRedirect('/new_breed')
             else:
                 messages.warning(request, 'El nombre de la raza no puede estar vacío.')
+        
         elif 'delete_breed' in request.POST:  # Para eliminar una raza
             breed_id = request.POST.get('delete_breed')
-            raza = RazaGanado.objects.get(pk=breed_id)
-            raza.delete()
-            messages.success(request, 'La raza ha sido eliminada exitosamente.')
+            try:
+                raza = RazaGanado.objects.get(pk=breed_id)
+                raza.delete()
+                messages.success(request, 'La raza ha sido eliminada exitosamente.')
+            except RestrictedError:
+                messages.error(request, 'No se puede eliminar esta raza porque está en uso.')
             return HttpResponseRedirect('/new_breed')
     
     # Obtener todas las razas para listarlas en la tabla
