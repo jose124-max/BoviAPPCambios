@@ -9,18 +9,47 @@
 <form id="breedForm" method="post">
     {% csrf_token %}
     <label for="inputBreedName">Nombre de la Raza:</label><br />
-    <input type="text" id="inputBreedName" name="inputBreedName" placeholder="Nombre de la nueva raza" maxlength="30" minlength="3"><br />
+    <input type="text" id="inputBreedName" name="inputBreedName" placeholder="Nombre de la nueva raza" maxlength="30"
+        minlength="3"><br />
     <button type="submit" class="btn-black">Registrar</button>
 </form>
+<br><br />
+<h5>Listado de Razas</h5>
+<div class="table-container">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nombre de la Raza</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for breed in breeds %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ breed.nombre_raza }}</td>
+                <td>
+                    <form method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="delete_breed" value="{{ breed.id }}">
+                        <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 <script>
     document.getElementById('breedForm').addEventListener('submit', function (event) {
-        event.preventDefault(); 
+        event.preventDefault();
 
         const breedName = document.getElementById('inputBreedName').value.trim();
 
         if (breedName) {
-            this.submit(); 
+            this.submit();
         } else {
             alert('El nombre de la raza no puede estar vacío.');
         }
@@ -31,6 +60,12 @@
 
 <style>
     h4 {
+        font-family: 'Arial', sans-serif;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    h5 {
         font-family: 'Arial', sans-serif;
         text-align: center;
         margin-bottom: 10px;
@@ -85,5 +120,19 @@
         background-color: #f8d7da;
         color: #721c24;
     }
+
+    .table-container {
+        max-height: 300px; 
+        overflow-y: auto;
+        width: 70%; 
+        margin: 0 auto; 
+        border: 1px solid #ddd;
+        border-radius: 5px; 
+    }
+
+    table {
+        width: 100%; 
+    }
+
 </style>
 {% endblock %}

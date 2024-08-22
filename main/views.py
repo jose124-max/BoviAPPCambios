@@ -349,18 +349,33 @@ def password_reset_confirm(request, uidb64, token):
 
 def new_breed(request):
     if not request.user.is_authenticated or Usuario.objects.get(user=request.user).tipo != TipoUsuario.objects.get(pk=1):
-        # Si no inició sesión o inició como un no-ganadero, redirigir al index
         return HttpResponseRedirect('/')
+    
+    # Agregar/Eliminar raza
     if request.method == "POST":
-        breed_name = request.POST.get('inputBreedName', '').strip()
-        if breed_name:
-            raza = RazaGanado(nombre_raza=breed_name)
-            raza.save()
-            messages.success(request, 'La raza se ha creado exitosamente.')
-            return HttpResponseRedirect('/new_breed')  # Redirigir para evitar reenvío del formulario
-        else:
-            messages.add_message(request, level=messages.WARNING, message='El nombre de la raza no puede estar vacío.')
-    context={'usuario':Usuario.objects.get(user=request.user)}
+        if 'inputBreedName' in request.POST:  # Para agregar una nueva raza
+            breed_name = request.POST.get('inputBreedName', '').strip()
+            if breed_name:
+                raza = RazaGanado(nombre_raza=breed_name)
+                raza.save()
+                messages.success(request, 'La raza se ha creado exitosamente.')
+                return HttpResponseRedirect('/new_breed')
+            else:
+                messages.warning(request, 'El nombre de la raza no puede estar vacío.')
+        elif 'delete_breed' in request.POST:  # Para eliminar una raza
+            breed_id = request.POST.get('delete_breed')
+            raza = RazaGanado.objects.get(pk=breed_id)
+            raza.delete()
+            messages.success(request, 'La raza ha sido eliminada exitosamente.')
+            return HttpResponseRedirect('/new_breed')
+    
+    # Obtener todas las razas para listarlas en la tabla
+    breeds = RazaGanado.objects.all()
+    context = {
+        'usuario': Usuario.objects.get(user=request.user),
+        'breeds': breeds,
+    }
+    
     return render(request, 'main/new_funcion.html', context)
 
 def buscarganado(request):
