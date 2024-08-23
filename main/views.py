@@ -623,3 +623,25 @@ def get_potreros_by_finca(request):
 def get_potreros_update(request, finca_id):
     potreros = Potrero.objects.filter(finca_id=finca_id).values('id', 'nombre_potrero')
     return JsonResponse({'potreros': list(potreros)})
+
+def cattle_by_estate(request):
+    if not request.user.is_authenticated or Usuario.objects.get(user=request.user).tipo != TipoUsuario.objects.get(pk=1):
+        return HttpResponseRedirect('/')
+    
+    estates = Finca.objects.all()
+    cattle_by_estate = {}
+
+    if request.method == "POST":
+        estate_id = request.POST.get('estate_id')
+        if estate_id:
+            estate = Finca.objects.get(pk=estate_id)
+            # Filtrar ganado usando el modelo GanadoFinca
+            ganado_finca = GanadoFinca.objects.filter(finca=estate)
+            cattle_by_estate[estate] = ganado_finca
+
+    context = {
+        'estates': estates,
+        'usuario': Usuario.objects.get(user=request.user),
+        'cattle_by_estate': cattle_by_estate
+    }
+    return render(request, 'main/view_ganado.html', context)

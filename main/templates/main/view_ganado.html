@@ -1,0 +1,67 @@
+{% extends 'main/base_generic.html' %}
+{% load static %}
+
+{% block title %}Ganado por Finca{% endblock %}
+
+{% block content %}
+<h3 class="card-title text-center" style="margin-bottom: 15px;">Filtrar Ganado por Finca</h3>
+<div class="d-flex flex-column align-items-center" style="height: 90%;">
+  <div class="scrollable-container">
+    <br>
+    <div class="container-sm border card">
+      <h3 class="card-title">Seleccionar Finca</h3>
+      <form action="{% url 'view_ganado' %}" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="idEstate">Finca</label>
+          <select id="idEstate" name="estate_id" class="form-select" required>
+            <option value="" selected disabled>--Seleccione una finca--</option>
+            {% for estate in estates %}
+            <option value="{{ estate.id }}">{{ estate.nombre_finca }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <br>
+        <button type="submit" class="btn btn-primary">Filtrar Ganado</button>
+      </form>
+      <br>
+      {% if cattle_by_estate %}
+      {% for estate, ganado_finca_set in cattle_by_estate.items %}
+      <div class="container-sm border card">
+        <h3 class="card-title">Ganado asociado a {{ estate.nombre_finca }}</h3>
+        <div class="table-container">
+          <table class="table table-responsive-md table-hover table-bordered">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Cabeza</th>
+                <th scope="col">Lote</th>
+                <th scope="col">Potrero</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ganado_finca in ganado_finca_set %}
+              <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td><a href="{% url 'cattle_info' cattle_id=ganado_finca.cabeza_ganado.id %}">{{ ganado_finca.cabeza_ganado.id }}</a></td>
+                <td>{{ ganado_finca.lote }}</td>
+                <td>{{ ganado_finca.potrero.nombre_potrero }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4">No hay ganado asociado a esta finca.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <br>
+      {% endfor %}
+      {% else %}
+      {% endif %}
+    </div>
+    <br>
+  </div>
+</div>
+{% endblock %}

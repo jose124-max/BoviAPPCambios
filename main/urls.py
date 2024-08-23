@@ -32,4 +32,5 @@ urlpatterns = [
     path('get-potreros/<int:finca_id>/', views.get_potreros, name='get_potreros_by_finca'),
     path('get_potreros/', views.get_potreros_by_finca, name='get_potreros_by_finca'),
     path('get_potreros_update/<int:finca_id>/', views.get_potreros_update, name='get_potreros'),
+    path('view_ganado/', views.cattle_by_estate, name='view_ganado'),
 ]
