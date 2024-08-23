@@ -5,68 +5,74 @@
 
 
 {% block content %}
-        <div class="d-flex flex-column align-items-center" style="height: 90%;">
-        <div class="container-sm border card">
-        <table class="table table-responsive-md table-hover table-bordered">
-            <th>ID</th>
-            <th>Raza</th>
-            <th>Dueno</th>
-            <th>Peso (en kg) </th>
-            <th>Fecha de nacimiento</th>
-            <th>Tipo de producción</th>
-            <th>Verificación de Mastitis</th>
-            {% if usuario.tipo.pk != 1 %}
-            <th>Dueño</th>
-            {% endif %}            
-            <tr>
-                <td> {{ datos_vaca.id }} </td>
-                <td> {{ nombre_raza}} </td>
-                <td> {{ datos_vaca.customer_name }} </td>
-                <td> {{ datos_vaca.peso_kg }} </td>
-                <td> {{ datos_vaca.fecha_nacimiento }} </td>
-                <td> {{ tipo_ganado }} </td>
-                <td>
-                  {% if datos_vaca.mastitis == 'x' %}
-                    No se ha evaluado
-                  {% elif datos_vaca.mastitis == 'y' %}
-                    Probablemente tenga mastitis
-                  {% elif datos_vaca.mastitis == 'n' %}
-                    Probablemente no tiene mastitis
-                  {% else %}
-                    Información no disponible
-                  {% endif %}
-                </td>
-                {% if usuario.tipo.pk != 1 %}
-                <td> <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Buscar</button> </td>
-                {% endif %}
-            </tr>
-        </table>
-        </div>
-        <a class="btn btn-primary mb-2" href="{% url 'update_cattle' cattle_id=datos_vaca.id %}" role="button">Editar vaca</a>
-        <button class="btn btn-danger mb-2" data-bs-toggle="modal" data-bs-target="#deleteModal" data-cattle-id="{{ datos_vaca.id }}">Eliminar vaca</button>
-    </div>
+<a href="javascript:history.back()" class="btn btn-outline-dark position-absolute" style="top: 150px; right: 141px;">
+  <i class="bi bi-arrow-left-circle-fill"></i> Volver atrás
+</a>
+<div class="d-flex flex-column align-items-center" style="height: 90%; margin-top: 90px;">
+  <h3>Información de vaca</h3>
+  <div class="container-sm border card mb-2 p-3">
+    <table class="table table-responsive-md table-hover table-bordered">
+      <th>ID</th>
+      <th>Raza</th>
+      <th>Dueno</th>
+      <th>Peso (en kg) </th>
+      <th>Fecha de nacimiento</th>
+      <th>Tipo de producción</th>
+      <th>Verificación de Mastitis</th>
+      {% if usuario.tipo.pk != 1 %}
+      <th>Dueño</th>
+      {% endif %}
+      <tr>
+        <td> {{ datos_vaca.id }} </td>
+        <td> {{ nombre_raza}} </td>
+        <td> {{ datos_vaca.customer_name }} </td>
+        <td> {{ datos_vaca.peso_kg }} </td>
+        <td> {{ datos_vaca.fecha_nacimiento }} </td>
+        <td> {{ tipo_ganado }} </td>
+        <td>
+          {% if datos_vaca.mastitis == 'x' %}
+          No se ha evaluado
+          {% elif datos_vaca.mastitis == 'y' %}
+          Probablemente tenga mastitis
+          {% elif datos_vaca.mastitis == 'n' %}
+          Probablemente no tiene mastitis
+          {% else %}
+          Información no disponible
+          {% endif %}
+        </td>
+        {% if usuario.tipo.pk != 1 %}
+        <td> <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+            data-bs-target="#exampleModal">Buscar</button> </td>
+        {% endif %}
+      </tr>
+    </table>
+  </div>
+  <a class="btn btn-primary mb-2" href="{% url 'update_cattle' cattle_id=datos_vaca.id %}" role="button">Editar vaca</a>
+  <button class="btn btn-danger mb-2" data-bs-toggle="modal" data-bs-target="#deleteModal"
+    data-cattle-id="{{ datos_vaca.id }}">Eliminar vaca</button>
+</div>
 
-  <!-- Modal -->
-  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Información de contacto</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            Nombre: {{ owner_fullname }}
-            <br>
-            Teléfono: {{ owner.telefono }}
-            <br>
-            Dirección: {{ owner.direccion }}
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        </div>
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Información de contacto</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Nombre: {{ owner_fullname }}
+        <br>
+        Teléfono: {{ owner.telefono }}
+        <br>
+        Dirección: {{ owner.direccion }}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
+</div>
 
 <!-- Modal para confirmar eliminación -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">

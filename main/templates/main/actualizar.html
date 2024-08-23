@@ -5,31 +5,38 @@
 
 
 {% block content %}
+<a href="javascript:history.back()" class="btn btn-outline-dark position-absolute" style="top: 150px; right: 141px;">
+    <i class="bi bi-arrow-left-circle-fill"></i> Volver atrás
+</a>
 <div class="d-flex flex-column align-items-center" style="height: 90%;">
     <h1 class="p-4">Esta es su información, cambie lo que necesite</h1>
     <div class="container-sm border rounded form-inline card">
-        <form action = "{% url 'actualizar' %}" method = "POST" >
+        <form action="{% url 'actualizar' %}" method="POST">
             {% csrf_token %}
             <div class="form-group">
                 <label for="idFirstName">Nombres</label>
-                <input type="text" class="form-control" id="idFirstName" name="inputFirstName" value="{{request.user.first_name}}" aria-describedby="help" required>
+                <input type="text" class="form-control" id="idFirstName" name="inputFirstName"
+                    value="{{request.user.first_name}}" aria-describedby="help" required>
             </div>
             <div class="form-group">
                 <label for="idLastName">Apellidos</label>
-                <input type="text" class="form-control" id="idLastName" name="inputLastName" value="{{request.user.last_name}}"  aria-describedby="help" required>
+                <input type="text" class="form-control" id="idLastName" name="inputLastName"
+                    value="{{request.user.last_name}}" aria-describedby="help" required>
             </div>
             <div class="form-group">
                 <label for="idEmail">Correo Electrónico</label>
-                <input type="email" class="form-control" id="idEmail" name="inputEmail" value="{{user.get_username}}" aria-describedby="help" required>
+                <input type="email" class="form-control" id="idEmail" name="inputEmail" value="{{user.get_username}}"
+                    aria-describedby="help" required>
             </div>
             <div class="form-group">
                 <label for="idPhone">Teléfono</label>
-                <input type="text" class="form-control" id="idPhone" name="inputPhone" value="{{usuario.telefono}}" aria-describedby="help" >
+                <input type="text" class="form-control" id="idPhone" name="inputPhone" value="{{usuario.telefono}}"
+                    aria-describedby="help">
             </div>
             <div class="form-group">
                 <label id="idAddress">Dirección</label>
-                <input type="text" class="form-control" id="idAddress" name="inputAddress" 
-                value="{{usuario.direccion}}" aria-describedby="help" >
+                <input type="text" class="form-control" id="idAddress" name="inputAddress" value="{{usuario.direccion}}"
+                    aria-describedby="help">
             </div>
             <div>
                 <h6>Soy:</h6>
