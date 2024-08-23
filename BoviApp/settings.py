@@ -64,9 +64,9 @@ WSGI_APPLICATION = 'BoviApp.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'BoviAPPDB3',
+        'NAME': 'BoviAPPDB',
         'USER': 'postgres',
-        'PASSWORD': '12345',
+        'PASSWORD': '123',
         'HOST': 'localhost',  # O la dirección IP si está en otro servidor
         'PORT': '5432',  # El puerto default de PostgreSQL es 5432
     }

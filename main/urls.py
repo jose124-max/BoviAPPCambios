@@ -31,4 +31,5 @@ urlpatterns = [
     path('new_potreros/', views.new_potreros, name='new_potreros'),
     path('get-potreros/<int:finca_id>/', views.get_potreros, name='get_potreros_by_finca'),
     path('get_potreros/', views.get_potreros_by_finca, name='get_potreros_by_finca'),
+    path('get_potreros_update/<int:finca_id>/', views.get_potreros_update, name='get_potreros'),
 ]

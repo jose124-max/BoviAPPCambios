@@ -277,33 +277,51 @@ def update_cattle(request, cattle_id):
     if not request.user.is_authenticated or Usuario.objects.get(user=request.user).tipo != TipoUsuario.objects.get(pk=1):
         # Si no inició sesión o inició como un no-ganadero, redirigir al index
         return HttpResponseRedirect('/')
+    
+    # Obtiene la información de la vaca y la finca asociada
     vaquita = CabezaGanado.objects.get(pk=cattle_id)
     breeds = RazaGanado.objects.all()
     cow_types = TipoGanado.objects.all()
     estates = Finca.objects.all().filter(usuario=Usuario.objects.get(user=request.user))
     associated_estate = GanadoFinca.objects.get(cabeza_ganado=vaquita)
+    
+    # Obtén los potreros asociados a la finca actual
+    potreros = Potrero.objects.filter(finca=associated_estate.finca)
+    
     if request.method == "POST":
+        # Actualiza los datos de la vaca
         vaquita.customer_name = request.POST['inputCustomerName']
         vaquita.peso_kg = float(request.POST['inputWeight'])
         vaquita.fecha_nacimiento = request.POST['inputBirthdate']
         vaquita.tipo = TipoGanado.objects.get(pk=int(request.POST['inputType']))
         vaquita.raza = RazaGanado.objects.get(pk=int(request.POST['inputBreed']))
-        associated_estate.delete()
-        associated_estate = GanadoFinca(cabeza_ganado=vaquita,
-                                        finca=Finca.objects.get(pk=int(request.POST['inputEstate'])),
-                                        lote=int(request.POST['inputLot']),
-                                        potrero=int(request.POST['inputPaddock']))
+        
+        # Actualiza la finca y el potrero asociado
+        associated_estate.delete()  # Elimina la relación anterior
+        associated_estate = GanadoFinca(
+            cabeza_ganado=vaquita,
+            finca=Finca.objects.get(pk=int(request.POST['inputEstate'])),
+            lote=int(request.POST['inputLot']),
+            potrero=Potrero.objects.get(pk=int(request.POST['inputPaddock']))  # Ahora usando el potrero seleccionado
+        )
+        
+        # Guarda los cambios
         vaquita.save()
         associated_estate.save()
+        
         return HttpResponseRedirect('/cattle_info/%s' % cattle_id)
-    context = {"vaquita": vaquita, 
-    'breeds': breeds, 
-    'cow_types': cow_types, 
-    'estates': estates, 
-    'birthdate': str(vaquita.fecha_nacimiento),
-    'associated_estate': associated_estate}
-    return render(request, 'main/update_cattle.html',context)
 
+    context = {
+        "vaquita": vaquita, 
+        'breeds': breeds, 
+        'cow_types': cow_types, 
+        'estates': estates, 
+        'birthdate': str(vaquita.fecha_nacimiento),
+        'associated_estate': associated_estate,
+        'potreros': potreros  # Pasamos los potreros al contexto
+    }
+    
+    return render(request, 'main/update_cattle.html', context)
 
 def update_estate(request, estate_id):
     if not request.user.is_authenticated or Usuario.objects.get(user=request.user).tipo != TipoUsuario.objects.get(pk=1):
@@ -601,3 +619,7 @@ def get_potreros_by_finca(request):
     finca_id = request.GET.get('finca_id')  # Obtén el id de la finca desde el parámetro GET
     potreros = Potrero.objects.filter(finca_id=finca_id).values('id', 'nombre_potrero')
     return JsonResponse(list(potreros), safe=False)
+
+def get_potreros_update(request, finca_id):
+    potreros = Potrero.objects.filter(finca_id=finca_id).values('id', 'nombre_potrero')
+    return JsonResponse({'potreros': list(potreros)})
