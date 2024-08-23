@@ -4,119 +4,133 @@
 {% block title %}Predicción de Datos{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-column align-items-center" style="height: 90%;">
-    <h1 class="p-4">Ingrese los datos para la predicción</h1>
-    <div class="container-sm border rounded form-inline card">
-        <form id="predict-form" action="{% url 'predict' %}" method="POST">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="idVaca">Seleccione una vaca</label>
-                <select class="form-control" id="idVaca" name="vaca">
-                    {% for vaca in vacas %}
-                        <option value="{{vaca.id}}">{{ vaca.customer_name }}</option>
-                    {% empty %}
-                        <option value="">No hay vacas disponibles</option>
-                    {% endfor %}
-                </select>
+<div class="d-flex flex-column align-items-center vh-100 overflow-auto">
+    <h2 class="p-4">Ingrese los datos para la predicción</h2>
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="border rounded card p-4 mb-4">
+                    <form id="predict-form" action="{% url 'predict' %}" method="POST">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="idVaca">Seleccione una vaca</label>
+                            <select class="form-control" id="idVaca" name="vaca">
+                                {% for vaca in vacas %}
+                                <option value="{{vaca.id}}">{{ vaca.customer_name }}</option>
+                                {% empty %}
+                                <option value="">No hay vacas disponibles</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="idDIM">DIM (Days In Milk)</label>
+                            <input type="number" class="form-control" id="idDIM" name="DIM( Days In Milk)" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="idAvg">Avg (7 days). Daily MY (L)</label>
+                            <input type="number" step="0.1" class="form-control" id="idAvg"
+                                name="Avg(7 days). Daily MY( L )" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="idKgMilk">Kg. milk 305 (Kg)</label>
+                            <input type="number" class="form-control" id="idKgMilk" name="Kg. milk 305 ( Kg )" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="idFat">Fat (%)</label>
+                            <input type="number" step="0.1" class="form-control" id="idFat" name="Fat (%)" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="idSNF">SNF (%)</label>
+                            <input type="number" step="0.1" class="form-control" id="idSNF" name="SNF (%)" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="idDensity">Density (Kg/m³)</label>
+                            <input type="number" step="0.1" class="form-control" id="idDensity" name="Density ( Kg/ m3"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label for="idProtein">Protein (%)</label>
+                            <input type="number" step="0.1" class="form-control" id="idProtein" name="Protein (%)"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label for="idConductivity">Conductivity (mS/cm)</label>
+                            <input type="number" step="0.1" class="form-control" id="idConductivity"
+                                name="Conductivity (mS/cm)" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="idPH">pH</label>
+                            <input type="number" step="0.01" class="form-control" id="idPH" name="pH" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="idFreezingPoint">Freezing point (⁰C)</label>
+                            <input type="number" step="0.1" class="form-control" id="idFreezingPoint"
+                                name="Freezing point (⁰C)" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="idSalt">Salt (%)</label>
+                            <input type="number" step="0.1" class="form-control" id="idSalt" name="Salt (%)" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="idLactose">Lactose (%)</label>
+                            <input type="number" step="0.1" class="form-control" id="idLactose" name="Lactose (%)"
+                                required>
+                        </div>
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary">Predecir</button>
+                            <button type="reset" class="btn btn-secondary ml-2">Limpiar</button>
+                        </div>                        
+                    </form>
+                    <div id="prediction-result" class="mt-4">
+                        <!-- Resultados de la predicción se mostrarán aquí -->
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="idDIM">DIM (Days In Milk)</label>
-                <input type="number" class="form-control" id="idDIM" name="DIM( Days In Milk)" required>
-            </div>
-            <div class="form-group">
-                <label for="idAvg">Avg (7 days). Daily MY (L)</label>
-                <input type="number" step="0.1" class="form-control" id="idAvg" name="Avg(7 days). Daily MY( L )" required>
-            </div>
-            <div class="form-group">
-                <label for="idKgMilk">Kg. milk 305 (Kg)</label>
-                <input type="number" class="form-control" id="idKgMilk" name="Kg. milk 305 ( Kg )" required>
-            </div>
-            <div class="form-group">
-                <label for="idFat">Fat (%)</label>
-                <input type="number" step="0.1" class="form-control" id="idFat" name="Fat (%)" required>
-            </div>
-            <div class="form-group">
-                <label for="idSNF">SNF (%)</label>
-                <input type="number" step="0.1" class="form-control" id="idSNF" name="SNF (%)" required>
-            </div>
-            <div class="form-group">
-                <label for="idDensity">Density (Kg/m³)</label>
-                <input type="number" step="0.1" class="form-control" id="idDensity" name="Density ( Kg/ m3" required>
-            </div>
-            <div class="form-group">
-                <label for="idProtein">Protein (%)</label>
-                <input type="number" step="0.1" class="form-control" id="idProtein" name="Protein (%)" required>
-            </div>
-            <div class="form-group">
-                <label for="idConductivity">Conductivity (mS/cm)</label>
-                <input type="number" step="0.1" class="form-control" id="idConductivity" name="Conductivity (mS/cm)" required>
-            </div>
-            <div class="form-group">
-                <label for="idPH">pH</label>
-                <input type="number" step="0.01" class="form-control" id="idPH" name="pH" required>
-            </div>
-            <div class="form-group">
-                <label for="idFreezingPoint">Freezing point (⁰C)</label>
-                <input type="number" step="0.1" class="form-control" id="idFreezingPoint" name="Freezing point (⁰C)" required>
-            </div>
-            <div class="form-group">
-                <label for="idSalt">Salt (%)</label>
-                <input type="number" step="0.1" class="form-control" id="idSalt" name="Salt (%)" required>
-            </div>
-            <div class="form-group">
-                <label for="idLactose">Lactose (%)</label>
-                <input type="number" step="0.1" class="form-control" id="idLactose" name="Lactose (%)" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Predecir</button>
-        </form>
-        <div id="prediction-result" class="mt-4">
-            <!-- Resultados de la predicción se mostrarán aquí -->
         </div>
     </div>
 </div>
 
 <script>
-document.getElementById('predict-form').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevenir el envío del formulario
+    document.getElementById('predict-form').addEventListener('submit', function (event) {
+        event.preventDefault(); // Prevenir el envío del formulario
 
-    // Crear un objeto FormData con los datos del formulario
-    const formData = new FormData(this);
-    
-    // Convertir FormData a un objeto JSON
-    const jsonData = {};
-    formData.forEach((value, key) => {
-        jsonData[key] = value;
+        // Crear un objeto FormData con los datos del formulario
+        const formData = new FormData(this);
+
+        // Convertir FormData a un objeto JSON
+        const jsonData = {};
+        formData.forEach((value, key) => {
+            jsonData[key] = value;
+        });
+
+        fetch('{% url "predict" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(jsonData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                const predictionResult = document.getElementById('prediction-result');
+
+                // Limpia el contenido anterior
+                predictionResult.innerHTML = '';
+
+                // Mostrar los resultados de la predicción
+                if (data.Prediction && data.Prediction[0] === '1') {
+                    predictionResult.innerHTML = `<div class="alert alert-danger" role="alert">¡Muy probable que tenga mastitis!</div>`;
+                } else if (data.Prediction && data.Prediction[0] === '0') {
+                    predictionResult.innerHTML = `<div class="alert alert-success" role="alert">No es probable que tenga mastitis.</div>`;
+                } else {
+                    predictionResult.innerHTML = `<div class="alert alert-warning" role="alert">No se pudo determinar la probabilidad.</div>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('prediction-result').innerHTML = `<div class="alert alert-danger" role="alert">Error en la predicción.</div>`;
+            });
     });
-
-    fetch('{% url "predict" %}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-        },
-        body: JSON.stringify(jsonData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        const predictionResult = document.getElementById('prediction-result');
-        
-        // Limpia el contenido anterior
-        predictionResult.innerHTML = '';
-
-        // Mostrar los resultados de la predicción
-        if (data.Prediction && data.Prediction[0] === '1') {
-            predictionResult.innerHTML = `<div class="alert alert-danger" role="alert">¡Muy probable que tenga mastitis!</div>`;
-        } else if (data.Prediction && data.Prediction[0] === '0') {
-            predictionResult.innerHTML = `<div class="alert alert-success" role="alert">No es probable que tenga mastitis.</div>`;
-        } else {
-            predictionResult.innerHTML = `<div class="alert alert-warning" role="alert">No se pudo determinar la probabilidad.</div>`;
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        document.getElementById('prediction-result').innerHTML = `<div class="alert alert-danger" role="alert">Error en la predicción.</div>`;
-    });
-});
-
 </script>
 {% endblock %}

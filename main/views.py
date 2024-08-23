@@ -514,6 +514,7 @@ def prediction_view(request):
 
     context = {
         'user': usuario,
+        'usuario': Usuario.objects.get(user=request.user),
         'vacas': vacas,
     }
     return render(request, "main/predict.html", context)
