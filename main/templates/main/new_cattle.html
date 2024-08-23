@@ -71,6 +71,13 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Obtener la fecha actual en formato YYYY-MM-DD
+        const today = new Date().toISOString().split('T')[0];
+
+        // Establecer el atributo max en el input de fecha de nacimiento
+        document.getElementById('idBirthdate').setAttribute('max', today);
+
+        // Manejar la selección de potrero según la finca seleccionada
         document.getElementById('idEstate').addEventListener('change', function () {
             const fincaId = this.value;
             const paddockSelect = document.getElementById('idPaddock');

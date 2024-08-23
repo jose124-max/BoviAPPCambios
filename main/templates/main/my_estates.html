@@ -106,11 +106,12 @@
             <input type="number" class="form-control" id="idWeight" name="inputWeight" placeholder="450.00" min="0"
               max="1000" step="0.01" required aria-describedby="help">
           </div>
+         
           <div class="form-group">
             <label for="idBirthdate">Fecha de nacimiento</label>
             <input type="date" class="form-control" id="idBirthdate" name="inputBirthdate" placeholder="2022-01-01"
-              required aria-describedby="help">
-          </div>
+                required aria-describedby="help">
+        </div>
           <div class="form-group">
             <label for="idBreed">Raza</label>
             <select id="idBreed" name="inputBreed" class="form-select" required>
@@ -150,33 +151,61 @@
     </div>
   </div>
 </div>
-
 <script>
   document.addEventListener('DOMContentLoaded', (event) => {
+    // Manejo del modal para vincular potreros
     const vincularModal = document.getElementById('vincularModal');
 
-    vincularModal.addEventListener('show.bs.modal', (event) => {
-      const button = event.relatedTarget;
-      const estateId = button.getAttribute('data-estate-id');
-      const estateInput = vincularModal.querySelector('#idEstate');
-      estateInput.value = estateId;
+    if (vincularModal) {
+      vincularModal.addEventListener('show.bs.modal', (event) => {
+        const button = event.relatedTarget;
+        const estateId = button.getAttribute('data-estate-id');
+        const estateInput = vincularModal.querySelector('#idEstate');
+        estateInput.value = estateId;
 
-      // Realiza la petición AJAX para cargar los potreros de la finca seleccionada
-      fetch(`/get-potreros/${estateId}/`)
-        .then(response => response.json())
-        .then(data => {
-          const paddockSelect = vincularModal.querySelector('#idPaddock');
-          paddockSelect.innerHTML = '<option value="" selected disabled>--Seleccione un potrero--</option>';
+        // Realiza la petición AJAX para cargar los potreros de la finca seleccionada
+        fetch(`/get-potreros/${estateId}/`)
+          .then(response => response.json())
+          .then(data => {
+            const paddockSelect = vincularModal.querySelector('#idPaddock');
+            paddockSelect.innerHTML = '<option value="" selected disabled>--Seleccione un potrero--</option>';
 
-          data.forEach(potrero => {
-            const option = document.createElement('option');
-            option.value = potrero.id;
-            option.textContent = potrero.nombre_potrero;
-            paddockSelect.appendChild(option);
-          });
-        })
-        .catch(error => console.error('Error:', error));
-    });
+            data.forEach(potrero => {
+              const option = document.createElement('option');
+              option.value = potrero.id;
+              option.textContent = potrero.nombre_potrero;
+              paddockSelect.appendChild(option);
+            });
+          })
+          .catch(error => console.error('Error:', error));
+      });
+    }
+
+    // Configuración del límite máximo para la fecha de nacimiento
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('idBirthdate').setAttribute('max', today);
+
+    // Manejo de la selección de potrero según la finca seleccionada
+    const estateSelect = document.getElementById('idEstate');
+    if (estateSelect) {
+      estateSelect.addEventListener('change', function () {
+        const fincaId = this.value;
+        const paddockSelect = document.getElementById('idPaddock');
+
+        fetch(`/get_potreros/?finca_id=${fincaId}`)
+          .then(response => response.json())
+          .then(data => {
+            paddockSelect.innerHTML = '<option value="" selected disabled>--Seleccione un potrero--</option>';
+            data.forEach(potrero => {
+              const option = document.createElement('option');
+              option.value = potrero.id;
+              option.textContent = potrero.nombre_potrero;
+              paddockSelect.appendChild(option);
+            });
+          })
+          .catch(error => console.error('Error fetching potreros:', error));
+      });
+    }
   });
 </script>
 {% endblock %}
