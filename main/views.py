@@ -135,7 +135,7 @@ def new_cattle(request):
     cow_types = TipoGanado.objects.all()
     potreros=Potrero.objects.all()
     estates = Finca.objects.all().filter(usuario=Usuario.objects.get(user=request.user))
-    context = {'breeds': breeds, 'cow_types': cow_types, 'potreros': potreros,'estates': estates}
+    context = {'breeds': breeds, 'cow_types': cow_types, 'potreros': potreros,'estates': estates, 'usuario':Usuario.objects.get(user=request.user)}
     return render(request, 'main/new_cattle.html', context)
 
 def new_estate(request):

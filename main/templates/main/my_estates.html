@@ -4,83 +4,87 @@
 {% block title %}Mis fincas{% endblock %}
 
 {% block content %}
-<h3 class="card-title text-center" style="margin-bottom: 15px;">Detalles</h3>
-<div class="d-flex flex-column align-items-center" style="height: 90%;">
-  <div class="scrollable-container">
-    <br>
-    <div class="text-end mt-3 me-4">
-      <a class="btn btn-primary" href="{% url 'new_estate' %}" role="button">Nueva finca</a>
-    </div>
-    <br>
-    <div class="container-sm border card">
-      <h3 class="card-title">Mis fincas</h3>
-      <table class="table table-responsive-md table-hover table-bordered">
-        <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">Nombre</th>
-            <th scope="col">Dirección</th>
-            <th scope="col">Teléfono</th>
-            <th scope="col">Accion</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for i in estates %}
-          <tr>
-            <th scope="row">{{ forloop.counter }}</th>
-            <td><a href="{% url 'view_estate' estate_id=i.id %}">{{i.nombre_finca}}</a></td>
-            <td>{{i.direccion}}</td>
-            <td>{{i.telefono}}</td>
-            <td><button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#vincularModal"
-                data-estate-id="{{i.id}}">Vincular ganado</button></td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <br>
+<div class="d-flex flex-column vh-100 overflow-auto">
+  <h3 class="card-title text-center my-4">Detalles</h3>
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-md-10 col-lg-8">
+        <div class="text-end mb-3">
+          <a class="btn btn-primary" href="{% url 'new_estate' %}" role="button">Nueva finca</a>
+        </div>
 
-    <br>
-    <br>
-    <div class="text-end mt-1 me-4">
-      <a class="btn btn-primary" href="{% url 'new_cattle' %}" role="button">Nueva vaca</a>
-    </div>
-    <br>
-    {% for estate, cattle in cattle_by_estate.items %}
-    <div class="container-sm border card">
-      <h3 class="card-title">Ganado asociado a {{ estate.nombre_finca }}</h3>
-      <div class="table-container">
-        <table class="table table-responsive-md table-hover table-bordered">
-          <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">Cabeza</th>
-              <th scope="col">Lote</th>
-              <th scope="col">Potrero</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for cattle_item in cattle %}
-            <tr>
-              <th scope="row">{{ forloop.counter }}</th>
-              <td><a
-                  href="{% url 'cattle_info' cattle_id=cattle_item.cabeza_ganado.id %}">{{cattle_item.cabeza_ganado.id}}</a>
-              </td>
-              <td>{{ cattle_item.lote }}</td>
-              <td>{{ cattle_item.potrero.nombre_potrero }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="4">No hay ganado asociado a esta finca.</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+        <div class="card mb-4">
+          <div class="card-body">
+            <h3 class="card-title">Mis fincas</h3>
+            <div class="table-responsive">
+              <table class="table table-hover table-bordered">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Dirección</th>
+                    <th scope="col">Teléfono</th>
+                    <th scope="col">Accion</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for i in estates %}
+                  <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td><a href="{% url 'view_estate' estate_id=i.id %}">{{i.nombre_finca}}</a></td>
+                    <td>{{i.direccion}}</td>
+                    <td>{{i.telefono}}</td>
+                    <td><button type="button" class="btn btn-link" data-bs-toggle="modal"
+                        data-bs-target="#vincularModal" data-estate-id="{{i.id}}">Vincular ganado</button></td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-end mb-3">
+          <a class="btn btn-primary" href="{% url 'new_cattle' %}" role="button">Nueva vaca</a>
+        </div>
+
+        {% for estate, cattle in cattle_by_estate.items %}
+        <div class="card mb-4">
+          <div class="card-body">
+            <h3 class="card-title">Ganado asociado a {{ estate.nombre_finca }}</h3>
+            <div class="table-responsive">
+              <table class="table table-hover table-bordered">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Cabeza</th>
+                    <th scope="col">Lote</th>
+                    <th scope="col">Potrero</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for cattle_item in cattle %}
+                  <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td><a
+                        href="{% url 'cattle_info' cattle_id=cattle_item.cabeza_ganado.id %}">{{cattle_item.cabeza_ganado.id}}</a>
+                    </td>
+                    <td>{{ cattle_item.lote }}</td>
+                    <td>{{ cattle_item.potrero.nombre_potrero }}</td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="4">No hay ganado asociado a esta finca.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
       </div>
     </div>
-    <br>
-    {% endfor %}
-    <br>
   </div>
 </div>
 
@@ -106,12 +110,12 @@
             <input type="number" class="form-control" id="idWeight" name="inputWeight" placeholder="450.00" min="0"
               max="1000" step="0.01" required aria-describedby="help">
           </div>
-         
+
           <div class="form-group">
             <label for="idBirthdate">Fecha de nacimiento</label>
             <input type="date" class="form-control" id="idBirthdate" name="inputBirthdate" placeholder="2022-01-01"
-                required aria-describedby="help">
-        </div>
+              required aria-describedby="help">
+          </div>
           <div class="form-group">
             <label for="idBreed">Raza</label>
             <select id="idBreed" name="inputBreed" class="form-select" required>
