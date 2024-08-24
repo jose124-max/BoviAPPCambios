@@ -646,3 +646,127 @@ def cattle_by_estate(request):
         'cattle_by_estate': cattle_by_estate
     }
     return render(request, 'main/view_ganado.html', context)
+
+def registrar_vacuna(request):
+    if not request.user.is_authenticated or Usuario.objects.get(user=request.user).tipo != TipoUsuario.objects.get(pk=1):
+        return HttpResponseRedirect('/')
+
+    if request.method == "POST":
+        vacuna_id = request.POST.get('vacuna')
+        cattle_id = request.POST.get('cattle')
+        finca_id = request.POST.get('finca')
+        fecha_vacuna = request.POST.get('fechaVacuna')
+
+        if vacuna_id and cattle_id and finca_id and fecha_vacuna:
+            vacuna = Vacuna.objects.get(pk=vacuna_id)
+            cabeza_ganado = CabezaGanado.objects.get(pk=cattle_id)
+            finca = Finca.objects.get(pk=finca_id)
+            
+            registro_vacunacion = RegistroVacunacion(
+                vacuna=vacuna,
+                cabeza_ganado=cabeza_ganado,
+                finca=finca,
+                fecha=fecha_vacuna
+            )
+            registro_vacunacion.save()
+            
+            messages.success(request, 'La vacunación se ha registrado exitosamente.')
+            return HttpResponseRedirect('/registrar_vacuna')
+        else:
+            messages.warning(request, 'Todos los campos son obligatorios.')
+
+    fincas = Finca.objects.filter(usuario=Usuario.objects.get(user=request.user))
+    vacunas = Vacuna.objects.all()
+    registros_vacunacion = RegistroVacunacion.objects.all()  # Obtener todos los registros de vacunación
+
+    context = {
+        'fincas': fincas,
+        'vacunas': vacunas,
+        'registros_vacunacion': registros_vacunacion,  # Pasar registros al contexto
+        'usuario': Usuario.objects.get(user=request.user),
+    }
+
+    return render(request, 'main/registrar_vacuna.html', context)
+
+def filtrar_ganado(request):
+    if not request.user.is_authenticated or Usuario.objects.get(user=request.user).tipo != TipoUsuario.objects.get(pk=1):
+        return HttpResponseRedirect('/')
+    
+    # Cargar todas las fincas
+    estates = Finca.objects.all()
+
+    if request.method == "POST":
+        estate_id = request.POST.get('estate_id')
+        if estate_id:
+            estate = Finca.objects.get(pk=estate_id)
+            # Filtrar ganado asociado a la finca seleccionada
+            ganado_finca = GanadoFinca.objects.filter(finca=estate).select_related('cabeza_ganado', 'potrero')
+
+            # Construir la respuesta en formato JSON
+            cattle_list = [
+                {
+                    'id': ganado.cabeza_ganado.id,
+                    'nombre': ganado.cabeza_ganado.customer_name,
+                    'potrero': ganado.potrero.nombre_potrero
+                }
+                for ganado in ganado_finca
+            ]
+            return JsonResponse(cattle_list, safe=False)
+
+    # Contexto inicial para la vista
+    context = {
+        'estates': estates,
+        'usuario': Usuario.objects.get(user=request.user),
+    }
+    return render(request, 'main/view_ganado.html', context)
+
+def crear_vacuna(request):
+    if not request.user.is_authenticated or Usuario.objects.get(user=request.user).tipo != TipoUsuario.objects.get(pk=1):
+        return redirect('/')
+    
+    if request.method == "POST":
+        if 'inputNombreVacuna' in request.POST:  # Para agregar una nueva vacuna
+            nombre = request.POST.get('inputNombreVacuna', '').strip()
+            descripcion = request.POST.get('inputDescripcionVacuna', '').strip()
+            if nombre:
+                vacuna = Vacuna(nombre=nombre, descripcion=descripcion)
+                vacuna.save()
+                messages.success(request, 'Vacuna creada exitosamente.')
+                return redirect('registrar_vacuna')  # Redirige para evitar reenvío del formulario
+            else:
+                messages.warning(request, 'El nombre de la vacuna es obligatorio.')
+        
+        elif 'delete_vacuna' in request.POST:  # Para eliminar una vacuna
+            vacuna_id = request.POST.get('delete_vacuna')
+            try:
+                vacuna = Vacuna.objects.get(pk=vacuna_id)
+                vacuna.delete()
+                messages.success(request, 'La vacuna ha sido eliminada exitosamente.')
+            except ProtectedError:
+                messages.error(request, 'No se puede eliminar esta vacuna porque está en uso.')
+            except Vacuna.DoesNotExist:
+                messages.error(request, 'La vacuna no existe.')
+            return redirect('registrar_vacuna')  # Redirige después de la eliminación
+    
+    # Obtener todas las vacunas para listarlas en la tabla
+    vacunas = Vacuna.objects.all()
+    context = {
+        'usuario': Usuario.objects.get(user=request.user),
+        'vacunas': vacunas,
+    }
+    
+    return render(request, 'main/registrar_vacuna.html', context)
+
+def mostrar_vacunaciones(request):
+    if not request.user.is_authenticated or Usuario.objects.get(user=request.user).tipo != TipoUsuario.objects.get(pk=1):
+        return HttpResponseRedirect('/')
+
+    # Obtener todos los registros de vacunación
+    registros_vacunacion = RegistroVacunacion.objects.all()
+
+    context = {
+        'registros_vacunacion': registros_vacunacion,
+        'usuario': Usuario.objects.get(user=request.user),
+    }
+
+    return render(request, 'main/mostrar_vacunaciones.html', context)

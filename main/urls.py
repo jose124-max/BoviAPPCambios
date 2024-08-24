@@ -33,4 +33,8 @@ urlpatterns = [
     path('get_potreros/', views.get_potreros_by_finca, name='get_potreros_by_finca'),
     path('get_potreros_update/<int:finca_id>/', views.get_potreros_update, name='get_potreros'),
     path('view_ganado/', views.cattle_by_estate, name='view_ganado'),
+    path('registrar_vacuna/', views.registrar_vacuna, name='registrar_vacuna'),
+    path('filtrar_ganado/', views.filtrar_ganado, name='filtrar_ganado'),
+    path('crear_vacuna/', views.crear_vacuna, name='crear_vacuna'),
+    path('mostrar_vacunaciones/', views.mostrar_vacunaciones, name='mostrar_vacunaciones'),
 ]

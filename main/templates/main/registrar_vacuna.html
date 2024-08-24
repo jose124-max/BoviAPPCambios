@@ -1,0 +1,230 @@
+{% extends 'main/base_generic.html' %}
+
+{% block title %}Registrar Vacuna{% endblock %}
+
+{% block content %}
+<div class="container-fluid d-flex justify-content-start" style="height: 70%;">
+    <!-- Contenedor estilizado para el formulario -->
+    <div class="col-md-5 p-4 bg-light shadow rounded ms-4">
+        <h4 class="text-center">Registrar Vacuna</h4>
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- Selección de Finca -->
+            <div class="mb-3">
+                <label for="finca" class="form-label">Selecciona la Finca</label>
+                <select class="form-select" id="finca" name="finca" required>
+                    <option selected disabled>Elige una finca</option>
+                    {% for finca in fincas %}
+                    <option value="{{ finca.id }}">{{ finca.nombre_finca }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Selección de Ganado y Potrero -->
+            <div class="mb-3">
+                <label for="cattle" class="form-label">Selecciona el Ganado y su Potrero</label>
+                <select class="form-select" id="cattle" name="cattle" required>
+                    <option selected disabled>Elige una cabeza de ganado</option>
+                </select>
+            </div>
+
+            <!-- Selección de Vacuna -->
+            <div class="mb-3">
+                <label for="vacuna" class="form-label">Selecciona la Vacuna</label>
+                <select class="form-select" id="vacuna" name="vacuna" required>
+                    <option selected disabled>Elige una vacuna</option>
+                    {% for vacuna in vacunas %}
+                    <option value="{{ vacuna.id }}">{{ vacuna.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Fecha de Vacunación con Validación -->
+            <div class="mb-3">
+                <label for="fechaVacuna" class="form-label">Fecha de Vacunación</label>
+                <input type="date" class="form-control" id="fechaVacuna" name="fechaVacuna" required>
+            </div>
+
+            <!-- Contenedor para los botones -->
+            <div class="d-flex flex-column align-items-center">
+                <!-- Botón para registrar la vacuna -->
+                <div class="mb-3 w-50">
+                    <button type="submit" class="btn btn-primary w-100">
+                        Registrar Vacuna
+                    </button>
+                </div>
+            </div>
+        </form>
+        <!-- Modal -->
+        <div class="modal fade" id="vacunaModal" tabindex="-1" aria-labelledby="vacunaModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="vacunaModalLabel">Nueva Vacuna</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" action="{% url 'crear_vacuna' %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="inputNombreVacuna" class="form-label">Nombre de la Vacuna</label>
+                                <input type="text" class="form-control" id="inputNombreVacuna" name="inputNombreVacuna"
+                                    required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="inputDescripcionVacuna" class="form-label">Descripción</label>
+                                <textarea class="form-control" id="inputDescripcionVacuna" name="inputDescripcionVacuna"
+                                    rows="3" required></textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                <button type="submit" class="btn btn-primary">Guardar Vacuna</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex flex-column align-items-center">
+            <!-- Botón para abrir el modal -->
+            <div class="w-50">
+                <button type="button" class="btn btn-secondary w-100" data-bs-toggle="modal"
+                    data-bs-target="#vacunaModal">
+                    Crear Vacuna
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5 offset-md-1 p-1">
+        <!-- Tabla de Registros de Vacunación -->
+        <div class="mb-5" style="margin-top: -20px;">
+            <h4 class="text-center">Registros de Vacunación</h4>
+            <div class="table-responsive" style="height: 200px; overflow-y: auto;">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Cabeza</th>
+                            <th>Finca</th>
+                            <th>Potrero</th>
+                            <th>Vacuna</th>
+                            <th>Fecha</th>
+                            <th class="border-end"></th> <!-- Barra espaciadora vertical -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for registro in registros_vacunacion %}
+                        <tr>
+                            <td>{{ registro.cabeza_ganado.id }}</td>
+                            <td>{{ registro.finca.nombre_finca }}</td>
+                            <td>{{ registro.potrero.nombre_potrero }}</td>
+                            <td>{{ registro.vacuna.nombre }}</td>
+                            <td>{{ registro.fecha }}</td>
+                            <td class="border-end"></td> <!-- Barra espaciadora vertical -->
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No hay registros de vacunación disponibles.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tabla de Listado de Vacunas -->
+<div>
+    <h4 class="text-center">Listado de Vacunas</h4>
+    <div class="table-responsive" style="height: 200px; overflow-y: auto;">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vacuna in vacunas %}
+                <tr>
+                    <td>{{ vacuna.nombre }}</td>
+                    <td>{{ vacuna.descripcion }}</td>
+                    <td>
+                        <!-- Botón que activa el modal -->
+                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ vacuna.id }}">
+                            Eliminar
+                        </button>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="deleteModal{{ vacuna.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ vacuna.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="deleteModalLabel{{ vacuna.id }}">Confirmar eliminación</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        ¿Estás seguro de que deseas eliminar la vacuna "{{ vacuna.nombre }}"?
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <!-- Formulario independiente de eliminación -->
+                                        <form method="post" action="{% url 'crear_vacuna' %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="delete_vacuna" value="{{ vacuna.id }}">
+                                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center">No hay vacunas registradas.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var fechaInput = document.getElementById('fechaVacuna');
+        var today = new Date().toISOString().split('T')[0];
+        fechaInput.setAttribute('max', today);
+
+        var fincaSelect = document.getElementById('finca');
+        var cattleSelect = document.getElementById('cattle');
+
+        fincaSelect.addEventListener('change', function () {
+            var fincaId = fincaSelect.value;
+
+            fetch('/filtrar_ganado/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'estate_id': fincaId,
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    cattleSelect.innerHTML = '<option selected disabled>Elige una cabeza de ganado</option>';
+
+                    data.forEach(function (ganado) {
+                        var option = document.createElement('option');
+                        option.value = ganado.id;
+                        option.textContent = `Cabeza ${ganado.id} - ${ganado.potrero}`;
+                        cattleSelect.appendChild(option);
+                    });
+                });
+        });
+    });
+</script>
+{% endblock %}

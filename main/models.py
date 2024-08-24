@@ -70,3 +70,20 @@ class Venta(models.Model):
     comprador = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     fecha_venta = models.DateField()
     monto_venta = models.FloatField()
+
+class Vacuna(models.Model):
+    nombre = models.CharField(max_length=100)
+    descripcion = models.TextField()
+
+    def __str__(self):
+        return f'{self.nombre} - {self.descripcion}'
+    
+class RegistroVacunacion(models.Model):
+    vacuna = models.ForeignKey(Vacuna, on_delete=models.CASCADE)
+    cabeza_ganado = models.ForeignKey(CabezaGanado, on_delete=models.CASCADE)
+    finca = models.ForeignKey(Finca, on_delete=models.CASCADE)
+    fecha = models.DateField()
+    potrero = models.ForeignKey(Potrero, on_delete=models.CASCADE, default=1)
+
+    def __str__(self):
+        return f'{self.vacuna.nombre} - {self.cabeza_ganado} - {self.fecha}'
