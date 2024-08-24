@@ -666,7 +666,8 @@ def registrar_vacuna(request):
                 vacuna=vacuna,
                 cabeza_ganado=cabeza_ganado,
                 finca=finca,
-                fecha=fecha_vacuna
+                fecha=fecha_vacuna,
+                potrero=GanadoFinca.objects.get(pk=cattle_id).potrero
             )
             registro_vacunacion.save()
             
