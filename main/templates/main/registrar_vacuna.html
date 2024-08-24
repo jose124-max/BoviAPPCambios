@@ -134,97 +134,100 @@
         </div>
 
         <!-- Tabla de Listado de Vacunas -->
-<div>
-    <h4 class="text-center">Listado de Vacunas</h4>
-    <div class="table-responsive" style="height: 200px; overflow-y: auto;">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Descripción</th>
-                    <th>Acción</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for vacuna in vacunas %}
-                <tr>
-                    <td>{{ vacuna.nombre }}</td>
-                    <td>{{ vacuna.descripcion }}</td>
-                    <td>
-                        <!-- Botón que activa el modal -->
-                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ vacuna.id }}">
-                            Eliminar
-                        </button>
+        <div>
+            <h4 class="text-center">Listado de Vacunas</h4>
+            <div class="table-responsive" style="height: 200px; overflow-y: auto;">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vacuna in vacunas %}
+                        <tr>
+                            <td>{{ vacuna.nombre }}</td>
+                            <td>{{ vacuna.descripcion }}</td>
+                            <td>
+                                <!-- Botón que activa el modal -->
+                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#deleteModal{{ vacuna.id }}">
+                                    Eliminar
+                                </button>
 
-                        <!-- Modal -->
-                        <div class="modal fade" id="deleteModal{{ vacuna.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ vacuna.id }}" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="deleteModalLabel{{ vacuna.id }}">Confirmar eliminación</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        ¿Estás seguro de que deseas eliminar la vacuna "{{ vacuna.nombre }}"?
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                        <!-- Formulario independiente de eliminación -->
-                                        <form method="post" action="{% url 'crear_vacuna' %}">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="delete_vacuna" value="{{ vacuna.id }}">
-                                            <button type="submit" class="btn btn-danger">Eliminar</button>
-                                        </form>
+                                <!-- Modal -->
+                                <div class="modal fade" id="deleteModal{{ vacuna.id }}" tabindex="-1"
+                                    aria-labelledby="deleteModalLabel{{ vacuna.id }}" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="deleteModalLabel{{ vacuna.id }}">Confirmar
+                                                    eliminación</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Cerrar"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                ¿Estás seguro de que deseas eliminar la vacuna "{{ vacuna.nombre }}"?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">Cancelar</button>
+                                                <form method="post" action="{% url 'eliminar_vacuna' vacuna.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                                                </form>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="3" class="text-center">No hay vacunas registradas.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center">No hay vacunas registradas.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var fechaInput = document.getElementById('fechaVacuna');
-        var today = new Date().toISOString().split('T')[0];
-        fechaInput.setAttribute('max', today);
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var fechaInput = document.getElementById('fechaVacuna');
+                var today = new Date().toISOString().split('T')[0];
+                fechaInput.setAttribute('max', today);
 
-        var fincaSelect = document.getElementById('finca');
-        var cattleSelect = document.getElementById('cattle');
+                var fincaSelect = document.getElementById('finca');
+                var cattleSelect = document.getElementById('cattle');
 
-        fincaSelect.addEventListener('change', function () {
-            var fincaId = fincaSelect.value;
+                fincaSelect.addEventListener('change', function () {
+                    var fincaId = fincaSelect.value;
 
-            fetch('/filtrar_ganado/', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    'estate_id': fincaId,
-                })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    cattleSelect.innerHTML = '<option selected disabled>Elige una cabeza de ganado</option>';
+                    fetch('/filtrar_ganado/', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}',
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams({
+                            'estate_id': fincaId,
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            cattleSelect.innerHTML = '<option selected disabled>Elige una cabeza de ganado</option>';
 
-                    data.forEach(function (ganado) {
-                        var option = document.createElement('option');
-                        option.value = ganado.id;
-                        option.textContent = `Cabeza ${ganado.id} - ${ganado.potrero}`;
-                        cattleSelect.appendChild(option);
-                    });
+                            data.forEach(function (ganado) {
+                                var option = document.createElement('option');
+                                option.value = ganado.id;
+                                option.textContent = `Cabeza ${ganado.id} - ${ganado.potrero}`;
+                                cattleSelect.appendChild(option);
+                            });
+                        });
                 });
-        });
-    });
-</script>
-{% endblock %}
+            });
+        </script>
+        {% endblock %}

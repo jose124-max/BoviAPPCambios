@@ -79,7 +79,7 @@ class Vacuna(models.Model):
         return f'{self.nombre} - {self.descripcion}'
     
 class RegistroVacunacion(models.Model):
-    vacuna = models.ForeignKey(Vacuna, on_delete=models.CASCADE)
+    vacuna = models.ForeignKey(Vacuna, on_delete=models.PROTECT)
     cabeza_ganado = models.ForeignKey(CabezaGanado, on_delete=models.CASCADE)
     finca = models.ForeignKey(Finca, on_delete=models.CASCADE)
     fecha = models.DateField()

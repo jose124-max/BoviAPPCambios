@@ -37,4 +37,5 @@ urlpatterns = [
     path('filtrar_ganado/', views.filtrar_ganado, name='filtrar_ganado'),
     path('crear_vacuna/', views.crear_vacuna, name='crear_vacuna'),
     path('mostrar_vacunaciones/', views.mostrar_vacunaciones, name='mostrar_vacunaciones'),
+    path('eliminar_vacuna/<int:vacuna_id>/', views.eliminar_vacuna, name='eliminar_vacuna'),
 ]

@@ -732,23 +732,10 @@ def crear_vacuna(request):
                 vacuna = Vacuna(nombre=nombre, descripcion=descripcion)
                 vacuna.save()
                 messages.success(request, 'Vacuna creada exitosamente.')
-                return redirect('registrar_vacuna')  # Redirige para evitar reenvío del formulario
+                return redirect('registrar_vacuna')
             else:
                 messages.warning(request, 'El nombre de la vacuna es obligatorio.')
-        
-        elif 'delete_vacuna' in request.POST:  # Para eliminar una vacuna
-            vacuna_id = request.POST.get('delete_vacuna')
-            try:
-                vacuna = Vacuna.objects.get(pk=vacuna_id)
-                vacuna.delete()
-                messages.success(request, 'La vacuna ha sido eliminada exitosamente.')
-            except ProtectedError:
-                messages.error(request, 'No se puede eliminar esta vacuna porque está en uso.')
-            except Vacuna.DoesNotExist:
-                messages.error(request, 'La vacuna no existe.')
-            return redirect('registrar_vacuna')  # Redirige después de la eliminación
     
-    # Obtener todas las vacunas para listarlas en la tabla
     vacunas = Vacuna.objects.all()
     context = {
         'usuario': Usuario.objects.get(user=request.user),
@@ -770,3 +757,17 @@ def mostrar_vacunaciones(request):
     }
 
     return render(request, 'main/mostrar_vacunaciones.html', context)
+
+def eliminar_vacuna(request, vacuna_id):
+    if not request.user.is_authenticated or Usuario.objects.get(user=request.user).tipo != TipoUsuario.objects.get(pk=1):
+        return redirect('/')
+
+    vacuna = get_object_or_404(Vacuna, pk=vacuna_id)
+    
+    try:
+        vacuna.delete()
+        messages.success(request, 'La vacuna ha sido eliminada exitosamente.')
+    except ProtectedError:
+        messages.error(request, 'No se puede eliminar esta vacuna porque está siendo utilizada en registros de vacunación.')
+
+    return redirect('registrar_vacuna')
