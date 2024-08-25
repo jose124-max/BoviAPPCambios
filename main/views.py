@@ -153,27 +153,23 @@ def new_estate(request):
         'cow_types': cow_types
     }
     if request.method == "POST":
-        print(request.POST)
-        finca = Finca(usuario=Usuario.objects.get(user=request.user),
-                      nombre_finca=request.POST["inputEstateName"],
-                      direccion=request.POST["inputAddress"],
-                      telefono=request.POST["inputPhone"],
-                      direccion_encargado=request.POST["inputStewardAddress"]
-                      )
-        finca.save()
-        return redirect('my_estates')
-        estates = Finca.objects.all().filter(usuario=Usuario.objects.get(user=request.user))
-        breeds = RazaGanado.objects.all()  # Ajusta esto según tu modelo real
-        cow_types = TipoGanado.objects.all()  # Ajusta esto según tu modelo real
+        nombre_finca = request.POST.get("inputEstateName", "").strip()
         
-        context = {
-            'estates': estates,
-            'user': request.user,
-            'usuario': Usuario.objects.get(user=request.user),
-            'breeds': breeds,
-            'cow_types': cow_types
-        }
-        return render(request, 'main/my_estates.html', context)
+        # Verificar si ya existe una finca con el mismo nombre para el usuario actual
+        if Finca.objects.filter(nombre_finca=nombre_finca, usuario=Usuario.objects.get(user=request.user)).exists():
+            messages.error(request, 'El nombre de la finca ya está en uso.')
+        else:
+            finca = Finca(
+                usuario=Usuario.objects.get(user=request.user),
+                nombre_finca=nombre_finca,
+                direccion=request.POST["inputAddress"],
+                telefono=request.POST["inputPhone"],
+                direccion_encargado=request.POST["inputStewardAddress"]
+            )
+            finca.save()
+            messages.success(request, 'La finca se ha creado exitosamente.')
+            return redirect('my_estates')
+    
     return render(request, 'main/new_estate.html', context)
 
 
@@ -318,27 +314,31 @@ def update_cattle(request, cattle_id):
         'estates': estates, 
         'birthdate': str(vaquita.fecha_nacimiento),
         'associated_estate': associated_estate,
-        'potreros': potreros  # Pasamos los potreros al contexto
+        'potreros': potreros,
+        'usuario': Usuario.objects.get(user=request.user),
     }
     
     return render(request, 'main/update_cattle.html', context)
 
 def update_estate(request, estate_id):
     if not request.user.is_authenticated or Usuario.objects.get(user=request.user).tipo != TipoUsuario.objects.get(pk=1):
-        # Si no inició sesión o inició como un no-ganadero, redirigir al index
         return HttpResponseRedirect('/')
     estate = Finca.objects.get(pk=estate_id)
+    
     if request.method == "POST":
-        print(request.POST)
-        estate.nombre_finca=request.POST["inputEstateName"]
-        estate.direccion=request.POST["inputAddress"]
-        estate.telefono=request.POST["inputPhone"]
-        estate.direccion_encargado=request.POST["inputStewardAddress"]
-        estate.save()
-        return HttpResponseRedirect('/view_estate/%s' % estate_id)
-    context = {"estate": estate}
+        nombre_finca = request.POST["inputEstateName"].strip()
+        if Finca.objects.filter(nombre_finca=nombre_finca).exclude(pk=estate_id).exists():
+            messages.error(request, 'El nombre de la finca ya está en uso. Elija otro.')
+        else:
+            estate.nombre_finca = nombre_finca
+            estate.save()
+            messages.success(request, 'Finca actualizada exitosamente.')
+            return HttpResponseRedirect('/view_estate/%s' % estate_id)
+    context = {
+        "estate": estate,
+        'usuario': Usuario.objects.get(user=request.user),
+    }
     return render(request, 'main/update_estate.html', context)
-
 
 def password_reset(request):
     if request.method == "POST":
@@ -381,9 +381,13 @@ def new_breed(request):
         if 'inputBreedName' in request.POST:  # Para agregar una nueva raza
             breed_name = request.POST.get('inputBreedName', '').strip()
             if breed_name:
-                raza = RazaGanado(nombre_raza=breed_name)
-                raza.save()
-                messages.success(request, 'La raza se ha creado exitosamente.')
+                # Verificar si ya existe una raza con el mismo nombre
+                if RazaGanado.objects.filter(nombre_raza=breed_name).exists():
+                    messages.error(request, 'El nombre de la raza ya está en uso.')
+                else:
+                    raza = RazaGanado(nombre_raza=breed_name)
+                    raza.save()
+                    messages.success(request, 'La raza se ha creado exitosamente.')
                 return HttpResponseRedirect('/new_breed')
             else:
                 messages.warning(request, 'El nombre de la raza no puede estar vacío.')
@@ -576,12 +580,16 @@ def new_potreros(request):
         if 'inputPaddockName' in request.POST:  # Para agregar un nuevo potrero
             nombre_potrero = request.POST.get('inputPaddockName', '').strip()
             finca_id = request.POST.get('inputEstate', '')
-
+            
             if nombre_potrero and finca_id:
                 finca = Finca.objects.get(pk=finca_id)
-                potrero = Potrero(nombre_potrero=nombre_potrero, finca=finca)
-                potrero.save()
-                messages.success(request, 'El potrero se ha creado exitosamente.')
+                # Verificar si ya existe un potrero con el mismo nombre en la misma finca
+                if Potrero.objects.filter(nombre_potrero=nombre_potrero, finca=finca).exists():
+                    messages.error(request, 'El nombre del potrero ya está en uso en esta finca.')
+                else:
+                    potrero = Potrero(nombre_potrero=nombre_potrero, finca=finca)
+                    potrero.save()
+                    messages.success(request, 'El potrero se ha creado exitosamente.')
                 return HttpResponseRedirect('/new_potreros')
             else:
                 messages.warning(request, 'Todos los campos son obligatorios.')
@@ -661,17 +669,25 @@ def registrar_vacuna(request):
             vacuna = Vacuna.objects.get(pk=vacuna_id)
             cabeza_ganado = CabezaGanado.objects.get(pk=cattle_id)
             finca = Finca.objects.get(pk=finca_id)
-            
-            registro_vacunacion = RegistroVacunacion(
+
+            if RegistroVacunacion.objects.filter(
                 vacuna=vacuna,
                 cabeza_ganado=cabeza_ganado,
                 finca=finca,
-                fecha=fecha_vacuna,
-                potrero=GanadoFinca.objects.get(pk=cattle_id).potrero
-            )
-            registro_vacunacion.save()
-            
-            messages.success(request, 'La vacunación se ha registrado exitosamente.')
+                fecha=fecha_vacuna
+            ).exists():
+                messages.error(request, 'Esta vacunación ya ha sido registrada previamente.')
+            else:
+                registro_vacunacion = RegistroVacunacion(
+                    vacuna=vacuna,
+                    cabeza_ganado=cabeza_ganado,
+                    finca=finca,
+                    fecha=fecha_vacuna,
+                    potrero=GanadoFinca.objects.get(pk=cattle_id).potrero
+                )
+                registro_vacunacion.save()
+                messages.success(request, 'La vacunación se ha registrado exitosamente.')
+
             return HttpResponseRedirect('/registrar_vacuna')
         else:
             messages.warning(request, 'Todos los campos son obligatorios.')
@@ -729,10 +745,15 @@ def crear_vacuna(request):
         if 'inputNombreVacuna' in request.POST:  # Para agregar una nueva vacuna
             nombre = request.POST.get('inputNombreVacuna', '').strip()
             descripcion = request.POST.get('inputDescripcionVacuna', '').strip()
+            
             if nombre:
-                vacuna = Vacuna(nombre=nombre, descripcion=descripcion)
-                vacuna.save()
-                messages.success(request, 'Vacuna creada exitosamente.')
+                # Verificar si ya existe una vacuna con el mismo nombre
+                if Vacuna.objects.filter(nombre=nombre).exists():
+                    messages.error(request, 'El nombre de la vacuna ya está en uso.')
+                else:
+                    vacuna = Vacuna(nombre=nombre, descripcion=descripcion)
+                    vacuna.save()
+                    messages.success(request, 'Vacuna creada exitosamente.')
                 return redirect('registrar_vacuna')
             else:
                 messages.warning(request, 'El nombre de la vacuna es obligatorio.')

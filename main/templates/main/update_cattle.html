@@ -4,7 +4,10 @@
 {% block title %}Editar vaca{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-column align-items-center" style="height: 90%;">
+<a href="javascript:history.back()" class="btn btn-outline-dark position-absolute" style="top: 150px; right: 141px;">
+    <i class="bi bi-arrow-left-circle-fill"></i> Volver atrás
+</a>
+<div class="container-fluid d-flex flex-column align-items-center vh-100 overflow-auto py-4">
     <h1 class="p-4">Editar vaca</h1>
     <div class="container-sm border rounded form-inline card">
         <form action="{% url 'update_cattle' cattle_id=vaquita.id %}" method="POST">

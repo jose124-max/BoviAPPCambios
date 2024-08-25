@@ -5,7 +5,7 @@
 
 
 {% block content %}
-<a href="javascript:history.back()" class="btn btn-outline-dark position-absolute" style="top: 150px; right: 141px;">
+<a href="{% url 'my_estates' %}" class="btn btn-outline-dark position-absolute" style="top: 150px; right: 141px;">
   <i class="bi bi-arrow-left-circle-fill"></i> Volver atrás
 </a>
 <div class="d-flex flex-column align-items-center" style="height: 90%; margin-top: 90px;">
@@ -14,7 +14,7 @@
     <table class="table table-responsive-md table-hover table-bordered">
       <th>ID</th>
       <th>Raza</th>
-      <th>Dueno</th>
+      <th>Dueño</th>
       <th>Peso (en kg) </th>
       <th>Fecha de nacimiento</th>
       <th>Tipo de producción</th>
